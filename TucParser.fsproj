@@ -5,8 +5,12 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageId>Tuc.Parser</PackageId>
+    <Description>A parser for TUC files.</Description>
     <Version>1.0.0</Version>
-    <RepositoryUrl>https://github.com/TypedUseCase/tuc-parser</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/TypedUseCase/tuc-parser</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TypedUseCase/tuc-parser.git</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>tuc;tuc-language;parser</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
