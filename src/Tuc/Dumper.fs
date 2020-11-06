@@ -148,7 +148,7 @@ module Dump =
         let private format formatValue findPositions parsed =
             let value =
                 match parsed with
-                | Parsed.KeyWordWithoutValue { KeyWord = { Value = value } } -> value
+                | Parsed.KeyWordWithoutValue { KeyWord = keyWord } -> keyWord |> KeyWord.value
                 | p -> p |> Parsed.value |> formatValue
 
             let positions = parsed |> findPositions
@@ -159,20 +159,25 @@ module Dump =
             format formatValue (function
                 | Parsed.KeyWord k ->
                     [
-                        k.KeyWord |> formatLocation "KeyWord"
+                        k.KeyWordLocation |> formatLocation "KeyWord"
                         k.ValueLocation |> formatLocation "Value"
                     ]
                 | Parsed.KeyWordWithoutValue k ->
                     [
-                        k.KeyWord |> formatLocation "KeyWord"
+                        k.KeyWordLocation |> formatLocation "KeyWord"
                     ]
                 | Parsed.ParticipantDefinition p ->
                     [
-                        Some (p.Context |> formatLocation "Context")
-                        p.Domain |> Option.map (formatLocation "Domain")
-                        p.Alias |> Option.map (formatLocation "Alias")
+                        yield p.Context |> formatLocation "Context"
+                        yield! p.Domain |> Option.map (formatLocation "Domain") |> Option.toList
+
+                        yield! p.Alias |> Option.map (fun (kw, alias) ->
+                            [
+                                kw |> formatLocation "KeyWord"
+                                alias |> formatLocation "Alias"
+                            ]
+                        ) |> Option.toList |> List.concat
                     ]
-                    |> List.choose id
                 | Parsed.ComponentDefinition c ->
                     [
                         yield c.Context |> formatLocation "Context"
@@ -182,11 +187,16 @@ module Dump =
                             match p with
                             | Parsed.ParticipantDefinition p ->
                                 [
-                                    Some (p.Context |> formatLocation "Context")
-                                    p.Domain |> Option.map (formatLocation "Domain")
-                                    p.Alias |> Option.map (formatLocation "Alias")
+                                    yield p.Context |> formatLocation "Context"
+                                    yield! p.Domain |> Option.map (formatLocation "Domain") |> Option.toList
+
+                                    yield! p.Alias |> Option.map (fun (kw, alias) ->
+                                        [
+                                            kw |> formatLocation "KeyWord"
+                                            alias |> formatLocation "Alias"
+                                        ]
+                                    ) |> Option.toList |> List.concat
                                 ]
-                                |> List.choose id
                                 |> List.formatLines "" id
                                 |> Some
                             | _ -> None
@@ -216,12 +226,12 @@ module Dump =
             format formatValue (function
                 | Parsed.KeyWord k ->
                     [
-                        k.KeyWord |> formatLocation "KeyWord"
+                        k.KeyWordLocation |> formatLocation "KeyWord"
                         k.ValueLocation |> formatLocation "Value"
                     ]
                 | Parsed.KeyWordWithBody k ->
                     [
-                        yield k.KeyWord |> formatLocation "KeyWord"
+                        yield k.KeyWordLocation |> formatLocation "KeyWord"
                         yield k.ValueLocation |> formatLocation "Value"
                         yield! k.Body |> List.map (tucPart showIgnored formatValue)
                     ]
