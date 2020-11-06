@@ -2,6 +2,7 @@
 
 <!-- There is always Unreleased section on the top. Subsections (Add, Changed, Fix, Removed) should be Add as needed. -->
 ## Unreleased
+- Add missing `KeyWord` value to `KeyWordIf`
 
 ## 2.0.0 - 2020-11-06
 - [**BC**] Add `alias` keyWord location to Parsed Participant Definition

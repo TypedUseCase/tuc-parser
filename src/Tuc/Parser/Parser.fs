@@ -858,6 +858,7 @@ module Parser =
                                     Body = body |> List.map Parsed.value
                                     Else = elseBody |> Option.map (List.map Parsed.value)
                                 }
+                                IfKeyWord = KeyWord.If
                                 IfLocation = {
                                     Value = "if"
                                     Location = ifRange |> location
@@ -866,6 +867,7 @@ module Parser =
                                     Value = condition
                                     Location = ifRange |> Range.fromEnd 1 condition.Length |> location
                                 }
+                                ElseKeyWord = elseRange |> Option.map (fun _ -> KeyWord.Else)
                                 ElseLocation = elseRange |> Option.map (fun elseRange ->
                                     {
                                         Value = "else"
