@@ -152,7 +152,7 @@ module Parser =
 
                 context, domain, alias
 
-            let private parseService location serviceName serviceDomain alias indentation line domainTypes =
+            let private parseService location parentComponent serviceName serviceDomain alias indentation line domainTypes =
                 let service (service: ServiceParticipant) =
                     let context, domain, alias =
                         line |> findParticipantLocations location (Service service) service.Domain service.Alias
@@ -162,6 +162,7 @@ module Parser =
                         Context = context
                         Domain = domain
                         Alias = alias
+                        Component = parentComponent
                     })
 
                 match domainTypes with
@@ -181,7 +182,7 @@ module Parser =
                     }
                 | _ -> Error <| Errors.undefinedParticipantInDomain indentation line serviceDomain
 
-            let private parseDataObject location streamName dataObjectDomain alias indentation line domainTypes =
+            let private parseDataObject location parentComponent streamName dataObjectDomain alias indentation line domainTypes =
                 let dataObject (dataObject: DataObjectParticipant) =
                     let context, domain, alias =
                         line |> findParticipantLocations location (DataObject dataObject) dataObject.Domain dataObject.Alias
@@ -191,6 +192,7 @@ module Parser =
                         Context = context
                         Domain = domain
                         Alias = alias
+                        Component = parentComponent
                     })
 
                 match domainTypes with
@@ -203,7 +205,7 @@ module Parser =
                     }
                 | _ -> Error <| Errors.undefinedParticipantInDomain indentation line dataObjectDomain
 
-            let private parseStream location streamName streamDomain alias indentation line domainTypes =
+            let private parseStream location parentComponent streamName streamDomain alias indentation line domainTypes =
                 let stream (stream: StreamParticipant) =
                     let context, domain, alias =
                         line |> findParticipantLocations location (ActiveParticipant.Stream stream) stream.Domain stream.Alias
@@ -213,6 +215,7 @@ module Parser =
                         Context = context
                         Domain = domain
                         Alias = alias
+                        Component = parentComponent
                     })
 
                 match domainTypes with
@@ -226,88 +229,98 @@ module Parser =
                 | _ -> Error <| Errors.undefinedParticipantInDomain indentation line streamDomain
 
             let private parseActiveParticipant location (domainTypes: DomainTypes) indentation line =
+                let parseService = parseService location None
+                let parseStream = parseStream location None
+                let parseDataObject = parseDataObject location None
+
                 match line with
                 | IndentedLine indentation line ->
                     match line |> Line.content with
                     // Service
                     | Regex @"^(\w+){1} (\w+){1}$" [ serviceName; serviceDomain ] ->
-                        domainTypes |> parseService location serviceName (DomainName.create serviceDomain) serviceName indentation line
+                        domainTypes |> parseService serviceName (DomainName.create serviceDomain) serviceName indentation line
 
                     | Regex @"^(\w+){1} (\w+){1} as ""(.+){1}""$" [ serviceName; serviceDomain; alias ] ->
-                        domainTypes |> parseService location serviceName (DomainName.create serviceDomain) alias indentation line
+                        domainTypes |> parseService serviceName (DomainName.create serviceDomain) alias indentation line
 
                     // Stream
                     | Regex @"^\[(\w+Stream){1}\] (\w+){1}$" [ streamName; streamDomain ] ->
-                        domainTypes |> parseStream location streamName (DomainName.create streamDomain) streamName indentation line
+                        domainTypes |> parseStream streamName (DomainName.create streamDomain) streamName indentation line
 
                     | Regex @"^\[(\w+Stream){1}\] (\w+){1} as ""(.+){1}""$" [ streamName; streamDomain; alias ] ->
-                        domainTypes |> parseStream location streamName (DomainName.create streamDomain) alias indentation line
+                        domainTypes |> parseStream streamName (DomainName.create streamDomain) alias indentation line
 
                     // Data Object
                     | Regex @"^\[(\w+){1}\] (\w+){1}$" [ dataObjectName; dataObjectDomain ] ->
-                        domainTypes |> parseDataObject location dataObjectName (DomainName.create dataObjectDomain) dataObjectName indentation line
+                        domainTypes |> parseDataObject dataObjectName (DomainName.create dataObjectDomain) dataObjectName indentation line
 
                     | Regex @"^\[(\w+){1}\] (\w+){1} as ""(.+){1}""$" [ streamName; streamDomain; alias ] ->
-                        domainTypes |> parseDataObject location streamName (DomainName.create streamDomain) alias indentation line
+                        domainTypes |> parseDataObject streamName (DomainName.create streamDomain) alias indentation line
 
                     | _ -> Error <| InvalidParticipant (line |> Line.error indentation)
 
                 | _ -> Error <| WrongParticipantIndentation (line |> Line.error indentation)
 
-            let private parseComponentActiveParticipant location (domainTypes: DomainTypes) indentation componentDomain line =
+            let private parseComponentActiveParticipant location (domainTypes: DomainTypes) indentation parentComponent line =
+                let parseService = parseService location (Some parentComponent)
+                let parseStream = parseStream location (Some parentComponent)
+                let parseDataObject = parseDataObject location (Some parentComponent)
+
+                let componentDomain = parentComponent.Domain
+
                 match line with
                 | IndentedLine indentation line ->
                     match line |> Line.content with
                     // Service
                     | Regex @"^(\w+){1}$" [ serviceName ] ->
-                        domainTypes |> parseService location serviceName componentDomain serviceName indentation line
+                        domainTypes |> parseService serviceName componentDomain serviceName indentation line
 
                     | Regex @"^(\w+){1} (\w+){1}$" [ serviceName; serviceDomain ] ->
                         if componentDomain |> DomainName.eq serviceDomain
-                        then domainTypes |> parseService location serviceName componentDomain serviceName indentation line
+                        then domainTypes |> parseService serviceName componentDomain serviceName indentation line
                         else Error <| Errors.wrongComponentParticipantDomain indentation line componentDomain
 
                     | Regex @"^(\w+){1} (\w+){1} as ""(.+){1}""$" [ serviceName; serviceDomain; alias ] ->
                         if componentDomain |> DomainName.eq serviceDomain
-                        then domainTypes |> parseService location serviceName componentDomain alias indentation line
+                        then domainTypes |> parseService serviceName componentDomain alias indentation line
                         else Error <| Errors.wrongComponentParticipantDomain indentation line componentDomain
 
                     | Regex @"^(\w+){1} as ""(.+){1}""$" [ serviceName; alias ] ->
-                        domainTypes |> parseService location serviceName componentDomain alias indentation line
+                        domainTypes |> parseService serviceName componentDomain alias indentation line
 
                     // Stream
                     | Regex @"^\[(\w+Stream){1}\]$" [ streamName ] ->
-                        domainTypes |> parseStream location streamName componentDomain streamName indentation line
+                        domainTypes |> parseStream streamName componentDomain streamName indentation line
 
                     | Regex @"^\[(\w+Stream){1}\] (\w+){1}$" [ streamName; streamDomain ] ->
                         if componentDomain |> DomainName.eq streamDomain
-                        then domainTypes |> parseStream location streamName componentDomain streamName indentation line
+                        then domainTypes |> parseStream streamName componentDomain streamName indentation line
                         else Error <| Errors.wrongComponentParticipantDomain indentation line componentDomain
 
                     | Regex @"^\[(\w+Stream){1}\] (\w+){1} as ""(.+){1}""$" [ streamName; streamDomain; alias ] ->
                         if componentDomain |> DomainName.eq streamDomain
-                        then domainTypes |> parseStream location streamName componentDomain alias indentation line
+                        then domainTypes |> parseStream streamName componentDomain alias indentation line
                         else Error <| Errors.wrongComponentParticipantDomain indentation line componentDomain
 
                     | Regex @"^\[(\w+Stream){1}\] as ""(.+){1}""$" [ streamName; alias ] ->
-                        domainTypes |> parseStream location streamName componentDomain alias indentation line
+                        domainTypes |> parseStream streamName componentDomain alias indentation line
 
                     // Data Object
                     | Regex @"^\[(\w+){1}\]$" [ dataObjectName ] ->
-                        domainTypes |> parseDataObject location dataObjectName componentDomain dataObjectName indentation line
+                        domainTypes |> parseDataObject dataObjectName componentDomain dataObjectName indentation line
 
                     | Regex @"^\[(\w+){1}\] (\w+){1}$" [ dataObjectName; dataObjectDomain ] ->
                         if componentDomain |> DomainName.eq dataObjectDomain
-                        then domainTypes |> parseDataObject location dataObjectName componentDomain dataObjectName indentation line
+                        then domainTypes |> parseDataObject dataObjectName componentDomain dataObjectName indentation line
                         else Error <| Errors.wrongComponentParticipantDomain indentation line componentDomain
 
                     | Regex @"^\[(\w+){1}\] (\w+){1} as ""(.+){1}""$" [ dataObjectName; dataObjectDomain; alias ] ->
                         if componentDomain |> DomainName.eq dataObjectDomain
-                        then domainTypes |> parseDataObject location dataObjectName componentDomain alias indentation line
+                        then domainTypes |> parseDataObject dataObjectName componentDomain alias indentation line
                         else Error <| Errors.wrongComponentParticipantDomain indentation line componentDomain
 
                     | Regex @"^\[(\w+){1}\] as ""(.+){1}""$" [ dataObjectName; alias ] ->
-                        domainTypes |> parseDataObject location dataObjectName componentDomain alias indentation line
+                        domainTypes |> parseDataObject dataObjectName componentDomain alias indentation line
 
                     | _ -> Error <| InvalidParticipant (line |> Line.error indentation)
 
@@ -335,8 +348,13 @@ module Parser =
                                     |> List.splitBy (Line.isIndentedOrMore componentParticipantIndentation)
 
                                 let! componentParticipants =
+                                    let componentParticipant = {
+                                        Context = componentName
+                                        Domain = domainName
+                                    }
+
                                     componentParticipantLines
-                                    |> List.map (parseComponentActiveParticipant location domainTypes componentParticipantIndentation domainName)
+                                    |> List.map (parseComponentActiveParticipant location domainTypes componentParticipantIndentation componentParticipant)
                                     |> Validation.ofResults
                                     |> Validation.toResult
 
@@ -353,6 +371,7 @@ module Parser =
                                     Parsed.ComponentDefinition {
                                         Value = Component {
                                             Name = componentName
+                                            Domain = domainName
                                             Participants = componentParticipants |> List.map Parsed.value
                                         }
                                         Context = {

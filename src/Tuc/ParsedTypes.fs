@@ -168,6 +168,7 @@ and ParsedParticipantDefinition<'Type> = {
     Context: ParsedLocation
     Domain: ParsedLocation option
     Alias: (ParsedLocation * ParsedLocation) option
+    Component: ParticipantComponentDefinition option
 }
 
 and ParsedComponentDefinition<'Type> = {
@@ -243,7 +244,7 @@ module Parsed =
         | Parsed.KeyWordWithoutValue k -> Parsed.KeyWordWithoutValue { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation }
         | Parsed.KeyWordWithBody k -> Parsed.KeyWordWithBody { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; ValueLocation = k.ValueLocation; Body = k.Body; Value = k.Value |> f }
         | Parsed.KeyWordIf k -> Parsed.KeyWordIf { IfKeyWord = k.IfKeyWord; IfLocation = k.IfLocation; ConditionLocation = k.ConditionLocation; ElseKeyWord = k.ElseKeyWord; ElseLocation = k.ElseLocation; Body = k.Body; ElseBody = k.ElseBody; Value = k.Value |> f }
-        | Parsed.ParticipantDefinition p -> Parsed.ParticipantDefinition { Context = p.Context; Domain = p.Domain; Alias = p.Alias; Value = p.Value |> f }
+        | Parsed.ParticipantDefinition p -> Parsed.ParticipantDefinition { Context = p.Context; Domain = p.Domain; Alias = p.Alias; Component = p.Component; Value = p.Value |> f }
         | Parsed.ComponentDefinition c -> Parsed.ComponentDefinition { Context = c.Context; Domain = c.Domain; Participants = c.Participants; Value = c.Value |> f }
         | Parsed.Lifeline l -> Parsed.Lifeline { ParticipantLocation = l.ParticipantLocation; Execution = l.Execution; Value = l.Value |> f }
         | Parsed.MethodCall m -> Parsed.MethodCall { ServiceLocation = m.ServiceLocation; MethodLocation = m.MethodLocation; Execution = m.Execution; Value = m.Value |> f }

@@ -3,6 +3,7 @@
 <!-- There is always Unreleased section on the top. Subsections (Add, Changed, Fix, Removed) should be Add as needed. -->
 ## Unreleased
 - Fix `Alias.Value` to have a surrounding `"`
+- Add a `Component option` to `ParsedParticipant`
 
 ## 2.0.1 - 2020-11-06
 - Add missing `KeyWord` value to `KeyWordIf`

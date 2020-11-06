@@ -193,6 +193,7 @@ module Parts =
                                 }
                             }
                             Alias = None
+                            Component = None
                         }
                     ]
 

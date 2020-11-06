@@ -111,6 +111,11 @@ module Event =
     let value = data >> Data.value
     let link = data >> Data.link
 
+type ParticipantComponentDefinition = {
+    Context: string
+    Domain: DomainName
+}
+
 type Tuc = {
     Name: TucName
     Participants: Participant list
@@ -123,7 +128,9 @@ and Participant =
 
 and ParticipantComponent = {
     Name: string
+    Domain: DomainName
     Participants: ActiveParticipant list
+    // todo - add a DomainType
 }
 
 and ActiveParticipant =
