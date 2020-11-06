@@ -161,7 +161,7 @@ and ParsedParticipantDefinition<'Type> = {
     Value: 'Type
     Context: ParsedLocation
     Domain: ParsedLocation option
-    Alias: ParsedLocation option
+    Alias: (ParsedLocation * ParsedLocation) option
 }
 
 and ParsedComponentDefinition<'Type> = {

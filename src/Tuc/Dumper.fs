@@ -168,11 +168,16 @@ module Dump =
                     ]
                 | Parsed.ParticipantDefinition p ->
                     [
-                        Some (p.Context |> formatLocation "Context")
-                        p.Domain |> Option.map (formatLocation "Domain")
-                        p.Alias |> Option.map (formatLocation "Alias")
+                        yield p.Context |> formatLocation "Context"
+                        yield! p.Domain |> Option.map (formatLocation "Domain") |> Option.toList
+
+                        yield! p.Alias |> Option.map (fun (kw, alias) ->
+                            [
+                                kw |> formatLocation "KeyWord"
+                                alias |> formatLocation "Alias"
+                            ]
+                        ) |> Option.toList |> List.concat
                     ]
-                    |> List.choose id
                 | Parsed.ComponentDefinition c ->
                     [
                         yield c.Context |> formatLocation "Context"
@@ -182,11 +187,16 @@ module Dump =
                             match p with
                             | Parsed.ParticipantDefinition p ->
                                 [
-                                    Some (p.Context |> formatLocation "Context")
-                                    p.Domain |> Option.map (formatLocation "Domain")
-                                    p.Alias |> Option.map (formatLocation "Alias")
+                                    yield p.Context |> formatLocation "Context"
+                                    yield! p.Domain |> Option.map (formatLocation "Domain") |> Option.toList
+
+                                    yield! p.Alias |> Option.map (fun (kw, alias) ->
+                                        [
+                                            kw |> formatLocation "KeyWord"
+                                            alias |> formatLocation "Alias"
+                                        ]
+                                    ) |> Option.toList |> List.concat
                                 ]
-                                |> List.choose id
                                 |> List.formatLines "" id
                                 |> Some
                             | _ -> None

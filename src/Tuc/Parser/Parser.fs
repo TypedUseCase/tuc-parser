@@ -129,14 +129,22 @@ module Parser =
                 }
 
                 let alias = maybe {
-                    let! range =
+                    let! aliasKeyWordRange =
                         match domain with
-                        | Some domain -> line |> Line.tryFindRangeForWordAfter (domain |> ParsedLocation.endChar) alias
-                        | _ -> line |> Line.tryFindRangeForWordAfter (context |> ParsedLocation.endChar) alias
+                        | Some domain -> line |> Line.tryFindRangeForWordAfter (domain |> ParsedLocation.endChar) "as"
+                        | _ -> line |> Line.tryFindRangeForWordAfter (context |> ParsedLocation.endChar) "as"
 
-                    return {
+                    let aliasKeyWordLocation = {
+                        Value = "as"
+                        Location = aliasKeyWordRange |> location
+                    }
+
+                    let! aliasValueRange =
+                        line |> Line.tryFindRangeForWordAfter (aliasKeyWordLocation |> ParsedLocation.endChar) (alias |> sprintf "%A")
+
+                    return aliasKeyWordLocation, {
                         Value = alias
-                        Location = range |> location
+                        Location = aliasValueRange |> location
                     }
                 }
 
