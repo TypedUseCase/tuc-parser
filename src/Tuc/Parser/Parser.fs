@@ -139,11 +139,13 @@ module Parser =
                         Location = aliasKeyWordRange |> location
                     }
 
+                    let aliasValue = (alias |> sprintf "%A")
+
                     let! aliasValueRange =
-                        line |> Line.tryFindRangeForWordAfter (aliasKeyWordLocation |> ParsedLocation.endChar) (alias |> sprintf "%A")
+                        line |> Line.tryFindRangeForWordAfter (aliasKeyWordLocation |> ParsedLocation.endChar) aliasValue
 
                     return aliasKeyWordLocation, {
-                        Value = alias
+                        Value = aliasValue
                         Location = aliasValueRange |> location
                     }
                 }
