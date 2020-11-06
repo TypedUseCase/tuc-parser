@@ -2,6 +2,50 @@ namespace Tuc
 
 open Tuc.Domain
 
+[<RequireQualifiedAccess>]
+type KeyWord =
+    | TucName
+    | Participants
+    | Alias
+    | Section
+    | Group
+    | If
+    | Else
+    | Loop
+
+[<RequireQualifiedAccess>]
+module KeyWord =
+    let parse = function
+        | "tuc" -> KeyWord.TucName
+        | "participants" -> KeyWord.Participants
+        | "as" -> KeyWord.Alias
+        | "section" -> KeyWord.Section
+        | "group" -> KeyWord.Group
+        | "if" -> KeyWord.If
+        | "else" -> KeyWord.Else
+        | "loop" -> KeyWord.Loop
+        | undefined -> failwithf "KeyWord %A is not defined." undefined
+
+    let value = function
+        | KeyWord.TucName -> "tuc"
+        | KeyWord.Participants -> "participants"
+        | KeyWord.Alias -> "as"
+        | KeyWord.Section -> "section"
+        | KeyWord.Group -> "group"
+        | KeyWord.If -> "if"
+        | KeyWord.Else -> "else"
+        | KeyWord.Loop -> "loop"
+
+    let descriptionMarkDown = function
+        | KeyWord.TucName -> "This is a start of a **tuc** definition. (_It will be a section in puml result._)"
+        | KeyWord.Participants -> "A participants keyword starts a participants definition section, where all use-case participants **must** be defined."
+        | KeyWord.Alias -> "Used to give the current participant an alias, which will be shown in the result."
+        | KeyWord.Section -> "It is a simple divider in the puml."
+        | KeyWord.Group -> "Allows to group use-case parts together."
+        | KeyWord.If -> "Allows to group use-case parts together by a condition."
+        | KeyWord.Else -> "Allows to group use-case parts together, when a condition does not pass."
+        | KeyWord.Loop -> "Allows to group use-case parts together in a loop with a condition."
+
 type TucName = TucName of string
 
 [<RequireQualifiedAccess>]

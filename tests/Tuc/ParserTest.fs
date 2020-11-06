@@ -116,7 +116,8 @@ module Parts =
                 {
                     Name = Parsed.KeyWord {
                         Value = TucName "Section test"
-                        KeyWord = {
+                        KeyWord = KeyWord.TucName
+                        KeyWordLocation = {
                             Value = "tuc"
                             Location = {
                                 Uri = "./Tuc/Fixtures/parts/section.tuc"
@@ -139,7 +140,8 @@ module Parts =
                     }
 
                     ParticipantsKeyWord = Parsed.KeyWordWithoutValue {
-                        KeyWord = {
+                        KeyWord = KeyWord.Participants
+                        KeyWordLocation = {
                             Value = "participants"
                             Location = {
                                 Uri = "./Tuc/Fixtures/parts/section.tuc"
@@ -197,7 +199,8 @@ module Parts =
                     Parts = [
                         Parsed.KeyWord {
                             Value = Section { Value = "One" }
-                            KeyWord = {
+                            KeyWord = KeyWord.Section
+                            KeyWordLocation = {
                                 Value = "section"
                                 Location = {
                                     Uri = "./Tuc/Fixtures/parts/section.tuc"
@@ -220,7 +223,8 @@ module Parts =
                         }
                         Parsed.KeyWord {
                             Value = Section { Value = "Two words" }
-                            KeyWord = {
+                            KeyWord = KeyWord.Section
+                            KeyWordLocation = {
                                 Value = "section"
                                 Location = {
                                     Uri = "./Tuc/Fixtures/parts/section.tuc"
@@ -243,7 +247,8 @@ module Parts =
                         }
                         Parsed.KeyWord {
                             Value = Section { Value = "More words with 42" }
-                            KeyWord = {
+                            KeyWord = KeyWord.Section
+                            KeyWordLocation = {
                                 Value = "section"
                                 Location = {
                                     Uri = "./Tuc/Fixtures/parts/section.tuc"

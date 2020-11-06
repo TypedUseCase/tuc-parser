@@ -133,17 +133,20 @@ type Parsed<'Type> =
 
 and ParsedKeyWord<'Type> = {
     Value: 'Type
-    KeyWord: ParsedLocation
+    KeyWord: KeyWord
+    KeyWordLocation: ParsedLocation
     ValueLocation: ParsedLocation
 }
 
 and ParsedKeyWordWithoutValue = {
-    KeyWord: ParsedLocation
+    KeyWord: KeyWord
+    KeyWordLocation: ParsedLocation
 }
 
 and ParsedKeyWordWithBody<'Type> = {
     Value: 'Type
-    KeyWord: ParsedLocation
+    KeyWord: KeyWord
+    KeyWordLocation: ParsedLocation
     ValueLocation: ParsedLocation
     Body: Parsed<TucPart> list
 }
@@ -229,13 +232,13 @@ module Parsed =
         | Parsed.Ignored value
             -> value
 
-        | Parsed.KeyWordWithoutValue { KeyWord = { Value = value } } -> failwithf "KeyWord %A does not have a value." value
+        | Parsed.KeyWordWithoutValue { KeyWordLocation = { Value = value } } -> failwithf "KeyWord %A does not have a value." value
         | Parsed.IncompleteHandleEvent _ -> failwithf "It is not allowed to get a value out of a Parsed.IncompleteHandleEvent, use ParsedIncompleteHandleEvent.complete first."
 
     let map (f: 'a -> 'b) = function
-        | Parsed.KeyWord k -> Parsed.KeyWord { KeyWord = k.KeyWord; ValueLocation = k.ValueLocation; Value = k.Value |> f }
-        | Parsed.KeyWordWithoutValue k -> Parsed.KeyWordWithoutValue { KeyWord = k.KeyWord }
-        | Parsed.KeyWordWithBody k -> Parsed.KeyWordWithBody { KeyWord = k.KeyWord; ValueLocation = k.ValueLocation; Body = k.Body; Value = k.Value |> f }
+        | Parsed.KeyWord k -> Parsed.KeyWord { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; ValueLocation = k.ValueLocation; Value = k.Value |> f }
+        | Parsed.KeyWordWithoutValue k -> Parsed.KeyWordWithoutValue { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation }
+        | Parsed.KeyWordWithBody k -> Parsed.KeyWordWithBody { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; ValueLocation = k.ValueLocation; Body = k.Body; Value = k.Value |> f }
         | Parsed.KeyWordIf k -> Parsed.KeyWordIf { IfLocation = k.IfLocation; ConditionLocation = k.ConditionLocation; ElseLocation = k.ElseLocation; Body = k.Body; ElseBody = k.ElseBody; Value = k.Value |> f }
         | Parsed.ParticipantDefinition p -> Parsed.ParticipantDefinition { Context = p.Context; Domain = p.Domain; Alias = p.Alias; Value = p.Value |> f }
         | Parsed.ComponentDefinition c -> Parsed.ComponentDefinition { Context = c.Context; Domain = c.Domain; Participants = c.Participants; Value = c.Value |> f }

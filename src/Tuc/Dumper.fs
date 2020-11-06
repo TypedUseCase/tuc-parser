@@ -148,7 +148,7 @@ module Dump =
         let private format formatValue findPositions parsed =
             let value =
                 match parsed with
-                | Parsed.KeyWordWithoutValue { KeyWord = { Value = value } } -> value
+                | Parsed.KeyWordWithoutValue { KeyWord = keyWord } -> keyWord |> KeyWord.value
                 | p -> p |> Parsed.value |> formatValue
 
             let positions = parsed |> findPositions
@@ -159,12 +159,12 @@ module Dump =
             format formatValue (function
                 | Parsed.KeyWord k ->
                     [
-                        k.KeyWord |> formatLocation "KeyWord"
+                        k.KeyWordLocation |> formatLocation "KeyWord"
                         k.ValueLocation |> formatLocation "Value"
                     ]
                 | Parsed.KeyWordWithoutValue k ->
                     [
-                        k.KeyWord |> formatLocation "KeyWord"
+                        k.KeyWordLocation |> formatLocation "KeyWord"
                     ]
                 | Parsed.ParticipantDefinition p ->
                     [
@@ -226,12 +226,12 @@ module Dump =
             format formatValue (function
                 | Parsed.KeyWord k ->
                     [
-                        k.KeyWord |> formatLocation "KeyWord"
+                        k.KeyWordLocation |> formatLocation "KeyWord"
                         k.ValueLocation |> formatLocation "Value"
                     ]
                 | Parsed.KeyWordWithBody k ->
                     [
-                        yield k.KeyWord |> formatLocation "KeyWord"
+                        yield k.KeyWordLocation |> formatLocation "KeyWord"
                         yield k.ValueLocation |> formatLocation "Value"
                         yield! k.Body |> List.map (tucPart showIgnored formatValue)
                     ]

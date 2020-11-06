@@ -434,7 +434,8 @@ module Parser =
                             |> parseParticipants location [] output domainTypes indentationLevel
 
                         let participantsKeyWord = Parsed.KeyWordWithoutValue {
-                            KeyWord = {
+                            KeyWord = KeyWord.Participants
+                            KeyWordLocation = {
                                 Value = "participants"
                                 Location = participantsRange |> location
                             }
@@ -897,7 +898,8 @@ module Parser =
                                     Value = groupName
                                     Location = groupRange |> Range.fromEnd 1 groupName.Length |> location
                                 }
-                                KeyWord = {
+                                KeyWord = KeyWord.Group
+                                KeyWordLocation = {
                                     Value = "group"
                                     Location = groupRange |> location
                                 }
@@ -926,7 +928,8 @@ module Parser =
                                     Value = condition
                                     Location = loopRange |> Range.fromEnd 1 condition.Length |> location
                                 }
-                                KeyWord = {
+                                KeyWord = KeyWord.Loop
+                                KeyWordLocation = {
                                     Value = "loop"
                                     Location = loopRange |> location
                                 }
@@ -1141,7 +1144,8 @@ module Parser =
                                     Value = section
                                     Location = sectionRange |> Range.fromEnd 1 section.Length |> location
                                 }
-                                KeyWord = {
+                                KeyWord = KeyWord.Section
+                                KeyWordLocation = {
                                     Value = "section"
                                     Location = sectionRange |> location
                                 }
@@ -1195,7 +1199,8 @@ module Parser =
                                         Value = name
                                         Location = tucRange |> Range.fromEnd 1 name.Length |> location
                                     }
-                                    KeyWord = {
+                                    KeyWord = KeyWord.TucName
+                                    KeyWordLocation = {
                                         Value = "tuc"
                                         Location = location tucRange
                                     }
