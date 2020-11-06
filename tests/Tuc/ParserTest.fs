@@ -58,6 +58,10 @@ module Common =
             |> Parser.parse output false domainTypes
 
         match expected, parsedTucs with
+        | Ok [], Ok actual ->
+            // todo - this is a special case, for now, so the parsing could be checked at least for a Ok result, because the type "tree" is so big
+            Expect.isFalse (actual |> List.isEmpty) description
+
         | Ok expected, Ok actual ->
             Expect.equal expected actual description
 
@@ -274,27 +278,27 @@ module Parts =
                 }
             ])
 
-            // todo: case "Initiator's lifeline" "lifeline.tuc" (Ok [])
+            case "Initiator's lifeline" "lifeline.tuc" (Ok [])
 
-            // todo: case "Notes" "note.tuc" (Ok [])
+            case "Notes" "note.tuc" (Ok [])
             case "Note without a caller" "note-without-caller.tuc" (Error [ NoteWithoutACaller (5, 0, @"""Note without caller""") ])
 
-            // todo: case "Do" "do.tuc" (Ok [])
+            case "Do" "do.tuc" (Ok [])
             case "Do without a caller" "do-without-caller.tuc" (Error [ DoWithoutACaller (5, 0, "do Some stuff") ])
 
-            // todo: case "Handle event in stream" "handle-event-in-stream.tuc" (Ok [])
+            case "Handle event in stream" "handle-event-in-stream.tuc" (Ok [])
 
             //case "Read data from data object" "read-data.tuc" (Ok [])
             //case "Post data to data object" "post-data.tuc" (Ok [])
 
-            // todo: case "Read event from stream" "read-event.tuc" (Ok [])
-            // todo: case "Post event to stream" "post-event.tuc" (Ok [])
+            case "Read event from stream" "read-event.tuc" (Ok [])
+            case "Post event to stream" "post-event.tuc" (Ok [])
 
-            // todo: case "Call a service method" "service-method-call.tuc" (Ok [])
+            case "Call a service method" "service-method-call.tuc" (Ok [])
 
-            // todo: case "Loops" "loop.tuc" (Ok [])
-            // todo: case "Groups" "group.tuc" (Ok [])
-            // todo: case "If" "if.tuc" (Ok [])
+            case "Loops" "loop.tuc" (Ok [])
+            case "Groups" "group.tuc" (Ok [])
+            case "If" "if.tuc" (Ok [])
         ]
 
 [<RequireQualifiedAccess>]
@@ -381,8 +385,8 @@ module Event =
 
     let provider: Case list =
         [
-            // todo: case "Valid cases" "valid.tuc" (Ok [])
-            // todo: case "Hr - single case event" "hr.tuc" (Ok [])
+            case "Valid cases" "valid.tuc" (Ok [])
+            case "Hr - single case event" "hr.tuc" (Ok [])
 
             case "InteractionEvent with typo" "wrong-interaction-event.tuc" (Error [
                 WrongEvent (
@@ -429,7 +433,7 @@ module Example =
 
     let provider: Case list =
         [
-            // todo: case "Readme example" "definition.tuc" (Ok [])
+            case "Readme example" "definition.tuc" (Ok [])
         ]
 
 [<RequireQualifiedAccess>]
@@ -440,7 +444,7 @@ module MultiTuc =
 
     let provider: Case list =
         [
-            // todo: case "4 Valid tucs in 1 file" "4-valid.tuc" (Ok [])
+            case "4 Valid tucs in 1 file" "4-valid.tuc" (Ok [])
 
             case "3 Different Errors and 1 correct tuc" "3-different-errors.tuc" (Error [
                 UndefinedComponentParticipant (4, 8, "        GenericService tests", "StreamComponent", ["StreamListener"], "GenericService")
@@ -458,7 +462,7 @@ module Formatted =
 
     let provider: Case list =
         [
-            // todo: case "Valid formatted notes, etc." "valid.tuc" (Ok [])
+            case "Valid formatted notes, etc." "valid.tuc" (Ok [])
         ]
 
 [<RequireQualifiedAccess>]
@@ -469,7 +473,7 @@ module MultiDomain =
 
     let provider: Case list =
         [
-            // todo: case "2 domains with DTOs." "2-domains-with-dtos.tuc" (Ok [])
+            case "2 domains with DTOs." "2-domains-with-dtos.tuc" (Ok [])
 
             //case "Umbiguous services." "service-conflict.tuc" (Error ( ...todo... ))
         ]
