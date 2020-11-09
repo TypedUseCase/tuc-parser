@@ -45,7 +45,11 @@ module Parser =
                 | _ -> None
 
             let (|SingleLineDo|_|) indentation: Line -> _ = function
-                | IndentedLine indentation { Tokens = "do" :: action } -> Some (action |> String.concat " ")
+                | IndentedLine indentation { Tokens = "do" :: action } as line ->
+                    Some (
+                        action |> String.concat " ",
+                        Range.singleLine (line.Number - 1) (0, "do".Length) |> Range.indent (line.Indentation |> Indentation.size)
+                    )
                 | _ -> None
 
             let (|SingleLineNote|_|) indentation: Line -> _ = function
@@ -823,8 +827,16 @@ module Parser =
                                 if actionLines |> List.isEmpty then
                                     return! Error <| DoMustHaveActions (line |> Line.error indentation)
 
-                                // todo - add a KeyWord.Do and parse location
-                                return Do { Caller = caller; Actions = actionLines |> List.map Line.content } |> Parsed.Ignored, lines
+                                let part = Parsed.KeyWordOnly {
+                                    Value = Do { Caller = caller; Actions = actionLines |> List.map Line.content }
+                                    KeyWord = KeyWord.Do
+                                    KeyWordLocation = {
+                                        Value = "do"
+                                        Location = line |> Line.findRangeForWord "do" |> location
+                                    }
+                                }
+
+                                return part, lines
                             }
 
                     | "if" -> Error <| IfWithoutCondition (line |> Line.error indentation)
@@ -835,10 +847,20 @@ module Parser =
                     | _ ->
                         Error <| UnknownPart (line |> Line.error indentation)
 
-                | KeyWords.SingleLineDo indentation action ->
+                | KeyWords.SingleLineDo indentation (action, keyWordRange) ->
                     match caller with
                     | None -> Error <| DoWithoutACaller (line |> Line.error indentation)
-                    | Some caller -> Ok (Do { Caller = caller; Actions = [ action ] } |> Parsed.Ignored, lines)
+                    | Some caller ->
+                        let part = Parsed.KeyWordOnly {
+                            Value = Do { Caller = caller; Actions = [ action ] }
+                            KeyWord = KeyWord.Do
+                            KeyWordLocation = {
+                                Value = "do"
+                                Location = keyWordRange |> location
+                            }
+                        }
+
+                        Ok (part, lines)
 
                 | KeyWords.SingleLineLeftNote indentation note ->
                     Ok (LeftNote { Lines = [ note ] } |> Parsed.Ignored, lines)

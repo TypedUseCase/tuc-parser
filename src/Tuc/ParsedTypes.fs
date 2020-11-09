@@ -118,6 +118,7 @@ module Location =
 [<RequireQualifiedAccess>]
 type Parsed<'Type> =
     | KeyWord of ParsedKeyWord<'Type>
+    | KeyWordOnly of ParsedKeyWordOnly<'Type>
     | KeyWordWithoutValue of ParsedKeyWordWithoutValue
     | KeyWordWithBody of ParsedKeyWordWithBody<'Type>
     | KeyWordIf of ParsedKeyWordIf<'Type>
@@ -136,6 +137,12 @@ and ParsedKeyWord<'Type> = {
     KeyWord: KeyWord
     KeyWordLocation: ParsedLocation
     ValueLocation: ParsedLocation
+}
+
+and ParsedKeyWordOnly<'Type> = {
+    Value: 'Type
+    KeyWord: KeyWord
+    KeyWordLocation: ParsedLocation
 }
 
 and ParsedKeyWordWithoutValue = {
@@ -226,6 +233,7 @@ and ParsedReadData<'Type> = {
 module Parsed =
     let value = function
         | Parsed.KeyWord { Value = value }
+        | Parsed.KeyWordOnly { Value = value }
         | Parsed.KeyWordWithBody { Value = value }
         | Parsed.KeyWordIf { Value = value }
         | Parsed.ParticipantDefinition { Value = value }
@@ -243,6 +251,7 @@ module Parsed =
 
     let map (f: 'a -> 'b) = function
         | Parsed.KeyWord k -> Parsed.KeyWord { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; ValueLocation = k.ValueLocation; Value = k.Value |> f }
+        | Parsed.KeyWordOnly k -> Parsed.KeyWordOnly { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; Value = k.Value |> f }
         | Parsed.KeyWordWithoutValue k -> Parsed.KeyWordWithoutValue { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation }
         | Parsed.KeyWordWithBody k -> Parsed.KeyWordWithBody { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; ValueLocation = k.ValueLocation; Body = k.Body; Value = k.Value |> f }
         | Parsed.KeyWordIf k -> Parsed.KeyWordIf { IfKeyWord = k.IfKeyWord; IfLocation = k.IfLocation; ConditionLocation = k.ConditionLocation; ElseKeyWord = k.ElseKeyWord; ElseLocation = k.ElseLocation; Body = k.Body; ElseBody = k.ElseBody; Value = k.Value |> f }

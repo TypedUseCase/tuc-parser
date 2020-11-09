@@ -29,6 +29,7 @@ type KeyWord =
     | If
     | Else
     | Loop
+    | Do
 
 [<RequireQualifiedAccess>]
 module KeyWord =
@@ -41,6 +42,7 @@ module KeyWord =
         | "if" -> KeyWord.If
         | "else" -> KeyWord.Else
         | "loop" -> KeyWord.Loop
+        | "do" -> KeyWord.Do
         | undefined -> failwithf "KeyWord %A is not defined." undefined
 
     let value = function
@@ -52,6 +54,7 @@ module KeyWord =
         | KeyWord.If -> "if"
         | KeyWord.Else -> "else"
         | KeyWord.Loop -> "loop"
+        | KeyWord.Do -> "do"
 
     let descriptionMarkDown = function
         | KeyWord.TucName -> "This is a start of a **tuc** definition. (_It will be a section in puml result._)"
@@ -62,6 +65,7 @@ module KeyWord =
         | KeyWord.If -> "Allows to group use-case parts together by a condition."
         | KeyWord.Else -> "Allows to group use-case parts together, when a condition does not pass."
         | KeyWord.Loop -> "Allows to group use-case parts together in a loop with a condition."
+        | KeyWord.Do -> "A special note above a caller."
 
 type TucName = TucName of string
 
