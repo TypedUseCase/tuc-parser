@@ -223,7 +223,7 @@ and ParticipantComponent = {
     Name: string
     Domain: DomainName
     Participants: ActiveParticipant list
-    // todo - add a DomainType
+    Type: DomainType
 }
 
 and ActiveParticipant =

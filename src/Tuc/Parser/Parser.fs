@@ -343,7 +343,7 @@ module Parser =
 
                     let parsedComponentResult =
                         match domainTypes with
-                        | HasDomainType (Some domainName) componentName (DomainType.Component domainName componentFields) ->
+                        | HasDomainType (Some domainName) componentName (DomainType.Component domainName componentFields as componentType) ->
                             result {
                                 let componentParticipantIndentation = participantIndentation |> Indentation.goDeeper indentationLevel
 
@@ -377,6 +377,7 @@ module Parser =
                                             Name = componentName
                                             Domain = domainName
                                             Participants = componentParticipants |> List.map Parsed.value
+                                            Type = componentType
                                         }
                                         Context = {
                                             Value = componentName
