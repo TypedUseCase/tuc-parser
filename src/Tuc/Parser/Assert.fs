@@ -130,15 +130,15 @@ module private Assert =
         data |> Data.path |> assertType [ dataType |> DomainType.name, dataType ] []
 
     let event (output: MF.ConsoleApplication.Output) indentation line domainTypes expectedEventTypeName domain eventName = result {
+        let domain, eventType =
+            match domain, domainTypes with
+            | Some domain, HasDomainType domain expectedEventTypeName eventType -> domain, eventType
+            | _ -> failwithf "[Assert] Undefined Event Type %A expected." expectedEventTypeName
+
         let! event =
             eventName
-            |> Event.ofString
+            |> Event.ofString domainTypes domain eventType
             |> Result.mapError (fun e -> Errors.wrongEventName e indentation line)
-
-        let eventType =
-            match domainTypes with
-            | HasDomainType domain expectedEventTypeName eventType -> eventType
-            | _ -> failwithf "[Assert] Undefined Event Type %A expected." expectedEventTypeName
 
         do!
             event
@@ -146,29 +146,29 @@ module private Assert =
             |> assertIsOfType output "Event"
                 (Errors.wrongEventName EventError.Empty)
                 Errors.wrongEvent
-                indentation line domainTypes domain
+                indentation line domainTypes (Some domain)
                 eventType
 
         return event
     }
 
     let data (output: MF.ConsoleApplication.Output) indentation line domainTypes expectedDataTypeName domain dataName = result {
+        let domain, dataType =
+            match domain, domainTypes with
+            | Some domain, HasDomainType domain expectedDataTypeName dataType -> domain, dataType
+            | _ -> failwithf "[Assert] Undefined Data Type %A expected." expectedDataTypeName
+
         let! data =
             dataName
-            |> Data.ofString
+            |> Data.ofString domainTypes domain dataType
             |> Result.mapError (fun e -> Errors.wrongDataName e indentation line)
-
-        let dataType =
-            match domainTypes with
-            | HasDomainType domain expectedDataTypeName dataType -> dataType
-            | _ -> failwithf "[Assert] Undefined Data Type %A expected." expectedDataTypeName
 
         do!
             data
             |> assertIsOfType output "Data"
                 (Errors.wrongDataName DataError.Empty)
                 Errors.wrongData
-                indentation line domainTypes domain
+                indentation line domainTypes (Some domain)
                 dataType
 
         return data

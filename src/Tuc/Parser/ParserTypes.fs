@@ -5,8 +5,6 @@ open Tuc
 open Tuc.Domain
 open ErrorHandling
 
-type private DomainTypes = DomainTypes of Map<DomainName option * TypeName, ResolvedType>
-
 type private Depth = Depth of int
 type private Indentation = Indentation of int
 type private IndentationLevel = IndentationLevel of Indentation

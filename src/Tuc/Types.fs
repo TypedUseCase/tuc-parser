@@ -2,6 +2,8 @@ namespace Tuc
 
 open Tuc.Domain
 
+type internal DomainTypes = DomainTypes of Map<DomainName option * TypeName, ResolvedType>
+
 [<RequireQualifiedAccess>]
 type Operator =
     | ReadData
@@ -77,22 +79,85 @@ type EventError =
     | Empty
     | WrongFormat
 
+type Cases = Map<int * TypeName option, (TypeName * DomainType) list>
+
 type Data = {
+    Domain: DomainName
     Original: string
     Path: string list
+    Type: DomainType
+    Cases: Cases
 }
 
 [<RequireQualifiedAccess>]
 module Data =
-    let ofString = function
+    let domainType ({ Type = t }: Data) = t
+
+    let private upsert key data (map: Cases) =
+        map
+        |> Map.add key (
+            match map |> Map.tryFind key with
+            | Some old -> old @ data
+            | _ -> data
+        )
+
+    let private domainTypeCases (DomainTypes domainTypes) domain: DomainType -> _ = function
+        | DomainType (DiscriminatedUnion { Cases = cases }) ->
+            cases
+            |> List.choose (function
+                | { Name = name; Argument = TypeDefinition.IsScalar scalar } ->
+                    Some (name, DomainType (ScalarType scalar))
+
+                | { Name = name; Argument = (Type arg) } ->
+                    domainTypes
+                    |> Map.tryFind (domain, arg)
+                    |> Option.map (fun argType -> name, DomainType argType)
+
+                | _ -> None
+            )
+
+        | DomainType (SingleCaseUnion { ConstructorName = name; ConstructorArgument = TypeDefinition.IsScalar scalar }) ->
+            [ TypeName name, DomainType (ScalarType scalar) ]
+
+        | DomainType (SingleCaseUnion { ConstructorName = name; ConstructorArgument = (Type arg) }) ->
+            domainTypes
+            |> Map.tryFind (domain, arg)
+            |> Option.map (fun argType -> TypeName name, DomainType argType)
+            |> Option.toList
+
+        // todo<later> - add cases from record fields
+
+        | _ -> []
+
+    let private cases domainTypes (domain, dataType) =
+        let domainTypeCases = domainTypeCases domainTypes (Some domain)
+
+        let rec loop i acc = function
+            | [] -> acc
+            | (parent, data) :: rest ->
+                let currentCases = data |> domainTypeCases
+                let acc = currentCases |> loop (i + 1) acc
+
+                rest
+                |> loop i (acc |> upsert (i, Some parent) currentCases)
+
+        let name = dataType |> DomainType.name
+
+        [ name, dataType ]
+        |> loop 1 (Map.ofList [ (0, None), [ name, dataType ] ])
+
+    let internal ofString domainTypes domain data = function
         | String.IsEmpty ->
             Error DataError.Empty
         | wrongFormat when wrongFormat.Contains " " || wrongFormat.StartsWith "." || wrongFormat.EndsWith "." ->
             Error DataError.WrongFormat
         | event ->
             Ok {
+                Domain = domain
                 Original = event
                 Path = event.Split "." |> List.ofSeq
+                Type = data
+                Cases = (domain, data) |> cases domainTypes
             }
 
     let path { Path = path } = path
@@ -109,6 +174,15 @@ module Data =
         | { Path = [ single ] } -> single
         | { Path = _ } as event -> sprintf "[[{%s}%s]]" (event |> value) (event |> lastInPath)
 
+    let case (index, item: string) ({ Cases = cases; Path = path }: Data) =
+        let parent =
+            if index > 0 then Some (TypeName path.[index - 1])
+            else None
+
+        cases
+        |> Map.tryFind (index, parent)
+        |> Option.bind (Map.ofList >> Map.tryFind (TypeName (item.Trim '.')))
+
 type Event = Event of Data
 
 [<RequireQualifiedAccess>]
@@ -117,7 +191,7 @@ module Event =
 
     let data (Event data) = data
 
-    let ofString = Data.ofString >!> Event >@> (function
+    let internal ofString domainTypes domain data = Data.ofString domainTypes domain data >!> Event >@> (function
         | DataError.Empty -> EventError.Empty
         | DataError.WrongFormat -> EventError.WrongFormat
     )
