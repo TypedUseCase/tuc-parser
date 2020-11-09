@@ -4,6 +4,7 @@
 ## Unreleased
 - Fix `Alias.Value` to have a surrounding `"`
 - Add a `Component option` to `ParsedParticipant`
+- Add an `Operator` type and module
 
 ## 2.0.1 - 2020-11-06
 - Add missing `KeyWord` value to `KeyWordIf`

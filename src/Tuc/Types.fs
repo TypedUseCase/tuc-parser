@@ -3,6 +3,21 @@ namespace Tuc
 open Tuc.Domain
 
 [<RequireQualifiedAccess>]
+type Operator =
+    | ReadData
+    | PostData
+
+[<RequireQualifiedAccess>]
+module Operator =
+    let value = function
+        | Operator.ReadData -> "->"
+        | Operator.PostData -> "->"
+
+    let descriptionMarkDown = function
+        | Operator.ReadData -> "In read data from a Data Object, it delimits a Data Object and the read data."
+        | Operator.PostData -> "In post data to a Data Object, it delimits the posted data and a Data Object."
+
+[<RequireQualifiedAccess>]
 type KeyWord =
     | TucName
     | Participants

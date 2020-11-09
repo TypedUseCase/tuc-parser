@@ -209,6 +209,7 @@ and ParsedHandleEvent<'Type> = {
 and ParsedPostData<'Type> = {
     Value: 'Type
     DataLocation: ParsedLocation list
+    Operator: Operator
     OperatorLocation: ParsedLocation
     DataObjectLocation: ParsedLocation
 }
@@ -216,6 +217,7 @@ and ParsedPostData<'Type> = {
 and ParsedReadData<'Type> = {
     Value: 'Type
     DataObjectLocation: ParsedLocation
+    Operator: Operator
     OperatorLocation: ParsedLocation
     DataLocation: ParsedLocation list
 }
@@ -250,8 +252,8 @@ module Parsed =
         | Parsed.MethodCall m -> Parsed.MethodCall { ServiceLocation = m.ServiceLocation; MethodLocation = m.MethodLocation; Execution = m.Execution; Value = m.Value |> f }
         | Parsed.IncompleteHandleEvent h -> Parsed.IncompleteHandleEvent { ServiceLocation = h.ServiceLocation; MethodLocation = h.MethodLocation; Execution = h.Execution; Value = h.Value |> f }
         | Parsed.HandleEvent h -> Parsed.HandleEvent { StreamLocation = h.StreamLocation; ServiceLocation = h.ServiceLocation; MethodLocation = h.MethodLocation; Execution = h.Execution; Value = h.Value |> f }
-        | Parsed.PostData h -> Parsed.PostData { DataLocation = h.DataLocation; OperatorLocation = h.OperatorLocation; DataObjectLocation = h.DataObjectLocation; Value = h.Value |> f }
-        | Parsed.ReadData h -> Parsed.ReadData { DataLocation = h.DataLocation; OperatorLocation = h.OperatorLocation; DataObjectLocation = h.DataObjectLocation; Value = h.Value |> f }
+        | Parsed.PostData h -> Parsed.PostData { DataLocation = h.DataLocation; Operator = h.Operator; OperatorLocation = h.OperatorLocation; DataObjectLocation = h.DataObjectLocation; Value = h.Value |> f }
+        | Parsed.ReadData h -> Parsed.ReadData { DataLocation = h.DataLocation; Operator = h.Operator; OperatorLocation = h.OperatorLocation; DataObjectLocation = h.DataObjectLocation; Value = h.Value |> f }
         | Parsed.Ignored t -> Parsed.Ignored (t |> f)
 
 [<RequireQualifiedAccess>]

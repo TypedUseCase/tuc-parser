@@ -823,6 +823,7 @@ module Parser =
                                 if actionLines |> List.isEmpty then
                                     return! Error <| DoMustHaveActions (line |> Line.error indentation)
 
+                                // todo - add a KeyWord.Do and parse location
                                 return Do { Caller = caller; Actions = actionLines |> List.map Line.content } |> Parsed.Ignored, lines
                             }
 
@@ -987,6 +988,7 @@ module Parser =
                                     Data = data
                                 }
                                 DataLocation = dataLocations
+                                Operator = Operator.PostData
                                 OperatorLocation = operatorLocation
                                 DataObjectLocation = {
                                     Value = dataObject |> ActiveParticipant.value
@@ -1032,6 +1034,7 @@ module Parser =
                                     Data = data
                                 }
                                 DataObjectLocation = dataObjectLocation
+                                Operator = Operator.ReadData
                                 OperatorLocation = operatorLocation
                                 DataLocation = dataLocations
                             }
@@ -1069,6 +1072,7 @@ module Parser =
                                     Event = event
                                 }
                                 DataLocation = dataLocations
+                                Operator = Operator.PostData
                                 OperatorLocation = operatorLocation
                                 DataObjectLocation = {
                                     Value = stream |> ActiveParticipant.value
@@ -1114,6 +1118,7 @@ module Parser =
                                     Event = event
                                 }
                                 DataLocation = dataLocations
+                                Operator = Operator.ReadData
                                 OperatorLocation = operatorLocation
                                 DataObjectLocation = dataObjectLocation
                             }
