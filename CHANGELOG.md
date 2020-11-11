@@ -11,6 +11,10 @@
     - Cases
 - Add `KeyWord` `Do` and parse it as a `Parsed.KeyWordOnly`
 - Add a field with `DomainType` to `ParticipantComponent`
+- Add more functions to the `Data` module
+    - `case`
+    - `casesFor`
+    - `iterCases`
 
 ## 2.0.1 - 2020-11-06
 - Add missing `KeyWord` value to `KeyWordIf`

@@ -150,33 +150,29 @@ module Data =
         [ name, dataType ]
         |> loop 1 (Map.ofList [ (0, None), [ name, dataType ] ])
 
-    let internal ofString domainTypes domain data = function
+    let internal ofString domainTypes domain dataType = function
         | String.IsEmpty ->
             Error DataError.Empty
         | wrongFormat when wrongFormat.Contains " " || wrongFormat.StartsWith "." || wrongFormat.EndsWith "." ->
             Error DataError.WrongFormat
-        | event ->
+        | dataPath ->
             Ok {
                 Domain = domain
-                Original = event
-                Path = event.Split "." |> List.ofSeq
-                Type = data
-                Cases = (domain, data) |> cases domainTypes
+                Original = dataPath
+                Path = dataPath.Split "." |> List.ofSeq
+                Type = dataType
+                Cases = (domain, dataType) |> cases domainTypes
             }
 
     let path { Path = path } = path
-
-    let lastInPath =
-        path
-        >> List.rev
-        >> List.head
+    let lastInPath = path >> List.last
 
     let value = path >> String.concat "."
 
     // @see https://plantuml.com/link
     let link = function
         | { Path = [ single ] } -> single
-        | { Path = _ } as event -> sprintf "[[{%s}%s]]" (event |> value) (event |> lastInPath)
+        | event -> sprintf "[[{%s}%s]]" (event |> value) (event |> lastInPath)
 
     let case (index, item: string) ({ Cases = cases; Path = path }: Data) =
         let parent =
@@ -186,6 +182,29 @@ module Data =
         cases
         |> Map.tryFind (index, parent)
         |> Option.bind (Map.ofList >> Map.tryFind (TypeName (item.Trim '.')))
+
+    // todo - this might be useful for another options of a current index
+    (* let casesForCurrent index ({ Cases = cases; Path = path }: Data) =
+        let parent =
+            if index > 0 then Some (TypeName path.[index - 1])
+            else None
+
+        cases
+        |> Map.tryFind (index, parent)
+        |> Option.defaultValue [] *)
+
+    let casesFor index ({ Cases = cases; Path = path }: Data) =
+        let current = Some (TypeName path.[index])
+
+        cases
+        |> Map.tryFind (index + 1, current)
+        |> Option.defaultValue []
+
+    let iterCases f ({ Cases = cases }: Data) =
+        cases
+        |> Map.iter (fun (index, parent) cases ->
+            f index parent cases
+        )
 
 type Event = Event of Data
 
