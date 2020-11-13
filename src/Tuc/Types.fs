@@ -76,12 +76,12 @@ module TucName =
 [<RequireQualifiedAccess>]
 type DataError =
     | Empty
-    | WrongFormat
+    | WrongFormat of data: string
 
 [<RequireQualifiedAccess>]
 type EventError =
     | Empty
-    | WrongFormat
+    | WrongFormat of eventName: string
 
 type Cases = Map<int * TypeName option, (TypeName * DomainType) list>
 
@@ -154,7 +154,7 @@ module Data =
         | String.IsEmpty ->
             Error DataError.Empty
         | wrongFormat when wrongFormat.Contains " " || wrongFormat.StartsWith "." || wrongFormat.EndsWith "." ->
-            Error DataError.WrongFormat
+            Error (DataError.WrongFormat wrongFormat)
         | dataPath ->
             Ok {
                 Domain = domain
@@ -216,8 +216,9 @@ module Event =
 
     let internal ofString domainTypes domain data = Data.ofString domainTypes domain data >!> Event >@> (function
         | DataError.Empty -> EventError.Empty
-        | DataError.WrongFormat -> EventError.WrongFormat
+        | DataError.WrongFormat value -> EventError.WrongFormat value
     )
+
     let path = data >> Data.path
     let lastInPath = data >> Data.lastInPath
     let value = data >> Data.value

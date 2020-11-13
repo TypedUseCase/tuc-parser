@@ -324,32 +324,32 @@ module ParseErrors =
             // Participants
             case "WrongParticipantIndentation" "WrongParticipantIndentation.tuc" (Error [ WrongParticipantIndentation (4, 4, "        StreamListener parts") ])
             case "WrongParticipantIndentation in component" "WrongParticipantIndentation-in-component.tuc" (Error [ WrongParticipantIndentation (4, 8, "            StreamListener parts") ])
-            case "ComponentWithoutParticipants" "ComponentWithoutParticipants.tuc" (Error [ ComponentWithoutParticipants (4, 4, "    StreamComponent parts") ])
+            case "ComponentWithoutParticipants" "ComponentWithoutParticipants.tuc" (Error [ ComponentWithoutParticipants (4, 4, "    StreamComponent parts", "StreamComponent") ])
             case "UndefinedComponentParticipant" "UndefinedComponentParticipant.tuc" (Error [
                 UndefinedComponentParticipant (4, 8, "        GenericService parts", "StreamComponent", ["StreamListener"], "GenericService")
                 UndefinedComponentParticipant (5, 8, "        Service parts", "StreamComponent", ["StreamListener"], "Service")
             ])
             case "UndefinedComponentParticipant - only one" "UndefinedComponentParticipantInDomain.tuc" (Error [
-                UndefinedComponentParticipantInDomain (5, 8, "        [ActivityStream] as \"Activity Stream\"", "Parts")
+                UndefinedComponentParticipantInDomain (5, 8, "        [ActivityStream] as \"Activity Stream\"", "Parts", "[ActivityStream]")
             ])
-            case "WrongComponentParticipantDomain" "WrongComponentParticipantDomain.tuc" (Error [ WrongComponentParticipantDomain (5, 8, "        Service wrongDomain", "Parts") ])
+            case "WrongComponentParticipantDomain" "WrongComponentParticipantDomain.tuc" (Error [ WrongComponentParticipantDomain (5, 8, "        Service wrongDomain", "Parts", "Service") ])
             case "InvalidParticipant" "InvalidParticipant.tuc" (Error [ InvalidParticipant (3, 4, "    GenericService domain foo bar") ])
-            case "UndefinedParticipantInDomain in participant definition" "UndefinedParticipantInDomain.tuc" (Error [ UndefinedParticipantInDomain (3, 4, "    ServiceNotInDomain parts", "Parts") ])
-            case "UndefinedParticipantInDomain in participant definition" "UndefinedParticipant-in-participants.tuc" (Error [ UndefinedParticipantInDomain (3, 4, "    UndefinedParticipantDefinition parts", "Parts") ])
-            case "UndefinedParticipant in parts" "UndefinedParticipant-in-parts.tuc" (Error [ UndefinedParticipant (6, 4, "    UndefinedParticipant.Foo") ])
+            case "UndefinedParticipantInDomain in participant definition" "UndefinedParticipantInDomain.tuc" (Error [ UndefinedParticipantInDomain (3, 4, "    ServiceNotInDomain parts", "Parts", "ServiceNotInDomain") ])
+            case "UndefinedParticipantInDomain in participant definition" "UndefinedParticipant-in-participants.tuc" (Error [ UndefinedParticipantInDomain (3, 4, "    UndefinedParticipantDefinition parts", "Parts", "UndefinedParticipantDefinition") ])
+            case "UndefinedParticipant in parts" "UndefinedParticipant-in-parts.tuc" (Error [ UndefinedParticipant (6, 4, "    UndefinedParticipant.Foo", "UndefinedParticipant") ])
 
             // parts
-            case "MissingUseCase" "MissingUseCase.tuc" (Error [ MissingUseCase (TucName "without a use-case") ])
+            case "MissingUseCase" "MissingUseCase.tuc" (Error [ MissingUseCase (7, TucName "without a use-case") ])
             case "SectionWithoutName" "SectionWithoutName.tuc" (Error [ SectionWithoutName (5, 0, "section") ])
-            case "IsNotInitiator" "IsNotInitiator.tuc" (Error [ IsNotInitiator (5, 0, "StreamListener") ])
-            case "CalledUndefinedMethod" "CalledUndefinedMethod.tuc" (Error [ CalledUndefinedMethod (7, 4, "    Service.UndefinedMethod", "Service", ["DoSomeWork"]) ])
-            case "CalledUndefinedHandler" "CalledUndefinedHandler.tuc" (Error [ CalledUndefinedHandler (7, 4, "    StreamListener.UndefinedHandler", "StreamListener", ["ReadEvent"]) ])
-            case "MethodCalledWithoutACaller" "MethodCalledWithoutACaller.tuc" (Error [ MethodCalledWithoutACaller (5, 0, "Service.Method") ])
-            case "DataPostedWithoutACaller" "DataPostedWithoutACaller.tuc" (Error [ DataPostedWithoutACaller (5, 0, "Person -> [PersonDatabase]") ])
-            case "DataReadWithoutACaller" "DataReadWithoutACaller.tuc" (Error [ DataReadWithoutACaller (5, 0, "[PersonDatabase] -> Person") ])
-            case "EventPostedWithoutACaller" "EventPostedWithoutACaller.tuc" (Error [ EventPostedWithoutACaller (5, 0, "InputEvent -> [InputStream]") ])
-            case "EventReadWithoutACaller" "EventReadWithoutACaller.tuc" (Error [ EventReadWithoutACaller (5, 0, "[InputStream] -> InputEvent") ])
-            case "MissingEventHandlerMethodCall" "MissingEventHandlerMethodCall.tuc" (Error [ MissingEventHandlerMethodCall (5, 0, "[InputStream]") ])
+            case "IsNotInitiator" "IsNotInitiator.tuc" (Error [ IsNotInitiator (5, 0, "StreamListener", "StreamListener") ])
+            case "CalledUndefinedMethod" "CalledUndefinedMethod.tuc" (Error [ CalledUndefinedMethod (7, 4, "    Service.UndefinedMethod", "Service", ["DoSomeWork"], "UndefinedMethod") ])
+            case "CalledUndefinedHandler" "CalledUndefinedHandler.tuc" (Error [ CalledUndefinedHandler (7, 4, "    StreamListener.UndefinedHandler", "StreamListener", ["ReadEvent"], "UndefinedHandler") ])
+            case "MethodCalledWithoutACaller" "MethodCalledWithoutACaller.tuc" (Error [ MethodCalledWithoutACaller (5, 0, "Service.Method", "Service", "Method") ])
+            case "DataPostedWithoutACaller" "DataPostedWithoutACaller.tuc" (Error [ DataPostedWithoutACaller (5, 0, "Person -> [PersonDatabase]", "Person", "[PersonDatabase]") ])
+            case "DataReadWithoutACaller" "DataReadWithoutACaller.tuc" (Error [ DataReadWithoutACaller (5, 0, "[PersonDatabase] -> Person", "[PersonDatabase]", "Person") ])
+            case "EventPostedWithoutACaller" "EventPostedWithoutACaller.tuc" (Error [ EventPostedWithoutACaller (5, 0, "InputEvent -> [InputStream]", "InputEvent", "[InputStream]") ])
+            case "EventReadWithoutACaller" "EventReadWithoutACaller.tuc" (Error [ EventReadWithoutACaller (5, 0, "[InputStream] -> InputEvent", "[InputStream]", "InputEvent") ])
+            case "MissingEventHandlerMethodCall" "MissingEventHandlerMethodCall.tuc" (Error [ MissingEventHandlerMethodCall (5, 0, "[InputStream]", "[InputStream]") ])
             case "InvalidMultilineNote" "InvalidMultilineNote.tuc" (Error [ InvalidMultilineNote (6, 4, "    \"\"\"") ])
             case "InvalidMultilineLeftNote" "InvalidMultilineLeftNote.tuc" (Error [ InvalidMultilineLeftNote (5, 0, "\"<\"") ])
             case "InvalidMultilineRightNote" "InvalidMultilineRightNote.tuc" (Error [ InvalidMultilineRightNote (5, 0, "\">\"") ])
@@ -367,14 +367,14 @@ module ParseErrors =
             case "UnknownPart" "UnknownPart.tuc" (Error [ UnknownPart (5, 0, "basically whaterver here") ])
 
             // others
-            case "WrongEventName - Post" "WrongEventName-post.tuc" (Error [ WrongEventName (7, 4, "    .InputEvent -> [InputStream]", "it has a wrong format (it must not start/end with . and not contains any spaces)") ])
-            case "WrongEventName - Read" "WrongEventName-read.tuc" (Error [ WrongEventName (7, 4, "    [InputStream] -> InputEvent.", "it has a wrong format (it must not start/end with . and not contains any spaces)") ])
-            case "WrongDataName - Post" "WrongDataName-post.tuc" (Error [ WrongDataName (7, 4, "    .Foo -> [PersonDatabase]", "it has a wrong format (it must not start/end with . and not contains any spaces)") ])
-            case "WrongDataName - Read" "WrongDataName-read.tuc" (Error [ WrongDataName (7, 4, "    [PersonDatabase] -> InputEvent.", "it has a wrong format (it must not start/end with . and not contains any spaces)") ])
-            case "WrongEvent - Post" "WrongEvent-post.tuc" (Error [ WrongEvent (7, 4, "    Wrong -> [InputStream]", ["InputEvent"]) ])
-            case "WrongEvent - Read" "WrongEvent-read.tuc" (Error [ WrongEvent (7, 4, "    [InputStream] -> Wrong", ["InputEvent"]) ])
-            case "WrongData - Post" "WrongData-post.tuc" (Error [ WrongData (7, 4, "    Wrong -> [PersonDatabase]", ["Person"]) ])
-            case "WrongData - Read" "WrongData-read.tuc" (Error [ WrongData (7, 4, "    [PersonDatabase] -> Wrong", ["Person"]) ])
+            case "WrongEventName - Post" "WrongEventName-post.tuc" (Error [ WrongEventName (7, 4, "    .InputEvent -> [InputStream]", "it has a wrong format (it must not start/end with . and not contains any spaces)", ".InputEvent") ])
+            case "WrongEventName - Read" "WrongEventName-read.tuc" (Error [ WrongEventName (7, 4, "    [InputStream] -> InputEvent.", "it has a wrong format (it must not start/end with . and not contains any spaces)", "InputEvent.") ])
+            case "WrongDataName - Post" "WrongDataName-post.tuc" (Error [ WrongDataName (7, 4, "    .Foo -> [PersonDatabase]", "it has a wrong format (it must not start/end with . and not contains any spaces)", ".Foo") ])
+            case "WrongDataName - Read" "WrongDataName-read.tuc" (Error [ WrongDataName (7, 4, "    [PersonDatabase] -> InputEvent.", "it has a wrong format (it must not start/end with . and not contains any spaces)", "InputEvent.") ])
+            case "WrongEvent - Post" "WrongEvent-post.tuc" (Error [ WrongEvent (7, 4, "    Wrong -> [InputStream]", ["InputEvent"], "Wrong") ])
+            case "WrongEvent - Read" "WrongEvent-read.tuc" (Error [ WrongEvent (7, 4, "    [InputStream] -> Wrong", ["InputEvent"], "Wrong") ])
+            case "WrongData - Post" "WrongData-post.tuc" (Error [ WrongData (7, 4, "    Wrong -> [PersonDatabase]", ["Person"], "Wrong") ])
+            case "WrongData - Read" "WrongData-read.tuc" (Error [ WrongData (7, 4, "    [PersonDatabase] -> Wrong", ["Person"], "Wrong") ])
         ]
 
 [<RequireQualifiedAccess>]
@@ -393,7 +393,8 @@ module Event =
                     10,
                     8,
                     "        InteractionEvents -> [InteractionStream]",
-                    ["InteractionEvent"]
+                    ["InteractionEvent"],
+                    "InteractionEvents"
                 )
             ])
 
@@ -402,7 +403,8 @@ module Event =
                     10,
                     24,
                     "        InteractionEvent.Confirmes -> [InteractionStream]",
-                    ["Confirmed"; "Rejected"; "Interaction"; "Other"]
+                    ["Confirmed"; "Rejected"; "Interaction"; "Other"],
+                    "InteractionEvent.Confirmes"
                 )
             ])
 
@@ -411,7 +413,8 @@ module Event =
                     10,
                     48,
                     "        InteractionEvent.Interaction.Interaction.Interaction -> [InteractionStream]",
-                    []
+                    [],
+                    "InteractionEvent.Interaction.Interaction.Interaction"
                 )
             ])
 
@@ -420,7 +423,8 @@ module Event =
                     10,
                     46,
                     "        InteractionEvent.Rejected.UserRejected.Boo -> [InteractionStream]",
-                    ["Foo"; "Bar"]
+                    ["Foo"; "Bar"],
+                    "InteractionEvent.Rejected.UserRejected.Boo"
                 )
             ])
         ]
@@ -449,8 +453,8 @@ module MultiTuc =
             case "3 Different Errors and 1 correct tuc" "3-different-errors.tuc" (Error [
                 UndefinedComponentParticipant (4, 8, "        GenericService tests", "StreamComponent", ["StreamListener"], "GenericService")
                 UndefinedComponentParticipant (5, 8, "        Service tests", "StreamComponent", ["StreamListener"], "Service")
-                ComponentWithoutParticipants (9, 4, "    StreamComponent tests")
-                CalledUndefinedMethod (27, 4, "    Service.UndefinedMethod", "Service", ["DoSomeWork"])
+                ComponentWithoutParticipants (9, 4, "    StreamComponent tests", "StreamComponent")
+                CalledUndefinedMethod (27, 4, "    Service.UndefinedMethod", "Service", ["DoSomeWork"], "UndefinedMethod")
             ])
         ]
 

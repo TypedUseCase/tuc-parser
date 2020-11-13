@@ -249,6 +249,25 @@ module Parsed =
         | Parsed.KeyWordWithoutValue { KeyWordLocation = { Value = value } } -> failwithf "KeyWord %A does not have a value." value
         | Parsed.IncompleteHandleEvent _ -> failwithf "It is not allowed to get a value out of a Parsed.IncompleteHandleEvent, use ParsedIncompleteHandleEvent.complete first."
 
+    let private location = function
+        | Parsed.KeyWord { KeyWordLocation = { Location = location } }
+        | Parsed.KeyWordOnly { KeyWordLocation = { Location = location } }
+        | Parsed.KeyWordWithBody { KeyWordLocation = { Location = location } }
+        | Parsed.KeyWordIf { IfLocation = { Location = location } }
+        | Parsed.KeyWordWithoutValue { KeyWordLocation = { Location = location } }
+        | Parsed.ParticipantDefinition { Context = { Location = location } }
+        | Parsed.ComponentDefinition { Context = { Location = location } }
+        | Parsed.Lifeline { ParticipantLocation = { Location = location } }
+        | Parsed.MethodCall { ServiceLocation = { Location = location } }
+        | Parsed.HandleEvent { StreamLocation = { Location = location } }
+        | Parsed.PostData { DataObjectLocation = { Location = location } }
+        | Parsed.ReadData { DataObjectLocation = { Location = location } }
+            -> Some location
+
+        | _ -> None
+
+    let line p = p |> location |> Option.map (fun location -> location.Range.Start.Line)
+
     let map (f: 'a -> 'b) = function
         | Parsed.KeyWord k -> Parsed.KeyWord { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; ValueLocation = k.ValueLocation; Value = k.Value |> f }
         | Parsed.KeyWordOnly k -> Parsed.KeyWordOnly { KeyWord = k.KeyWord; KeyWordLocation = k.KeyWordLocation; Value = k.Value |> f }

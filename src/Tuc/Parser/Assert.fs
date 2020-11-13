@@ -10,7 +10,11 @@ module private Assert =
 
     let isInitiator line indentation = function
         | DomainType (SingleCaseUnion { ConstructorName = "Initiator" }) -> Ok ()
-        | _ -> Error <| IsNotInitiator (line |> Line.error indentation)
+        | d ->
+            line
+            |> Line.error indentation
+            |> fun (lineNumber, position, line) -> IsNotInitiator (lineNumber, position, line, (d |> DomainType.nameValue))
+            |> Error
 
     let definedComponentParticipants
         indentationLevel
@@ -24,7 +28,9 @@ module private Assert =
         = result {
             if componentParticipants |> List.isEmpty then
                 return! Error [
-                    ComponentWithoutParticipants (line |> Line.error (indentationLevel |> IndentationLevel.indentation))
+                    line
+                    |> Line.error (indentationLevel |> IndentationLevel.indentation)
+                    |> fun (lineNumber, position, line) -> ComponentWithoutParticipants (lineNumber, position, line, componentName)
                 ]
 
             let! _ =
@@ -145,7 +151,7 @@ module private Assert =
             |> Event.data
             |> assertIsOfType output "Event"
                 (Errors.wrongEventName EventError.Empty)
-                Errors.wrongEvent
+                (Errors.wrongEvent eventName)
                 indentation line domainTypes (Some domain)
                 eventType
 
@@ -167,7 +173,7 @@ module private Assert =
             data
             |> assertIsOfType output "Data"
                 (Errors.wrongDataName DataError.Empty)
-                Errors.wrongData
+                (Errors.wrongData dataName)
                 indentation line domainTypes (Some domain)
                 dataType
 
