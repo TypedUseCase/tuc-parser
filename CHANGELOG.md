@@ -2,6 +2,8 @@
 
 <!-- There is always Unreleased section on the top. Subsections (Add, Changed, Fix, Removed) should be Add as needed. -->
 ## Unreleased
+
+## 3.0.0 - 2020-11-13
 - Fix `Alias.Value` to have a surrounding `"`
 - Add a `Component option` to `ParsedParticipant`
 - Add an `Operator` type and module
