@@ -5,8 +5,6 @@ open Tuc
 open Tuc.Domain
 open ErrorHandling
 
-type private DomainTypes = DomainTypes of Map<DomainName option * TypeName, ResolvedType>
-
 type private Depth = Depth of int
 type private Indentation = Indentation of int
 type private IndentationLevel = IndentationLevel of Indentation
@@ -160,43 +158,43 @@ module private Line =
 
 [<RequireQualifiedAccess>]
 module private Errors =
-    let calledUndefinedMethod indentation service definedMethods line =
+    let calledUndefinedMethod indentation service definedMethods method line =
         let n, p, c = line |> Line.error indentation
-        CalledUndefinedMethod (n, p, c, service, definedMethods)
+        CalledUndefinedMethod (n, p, c, service, definedMethods, method)
 
-    let calledUndefinedHandler indentation service definedHandlers line =
+    let calledUndefinedHandler indentation service definedHandlers handler line =
         let n, p, c = line |> Line.error indentation
-        CalledUndefinedHandler (n, p, c, service, definedHandlers)
+        CalledUndefinedHandler (n, p, c, service, definedHandlers, handler)
 
     let wrongEventName eventError indentation line =
         let n, p, c = line |> Line.error indentation
 
         match eventError with
-        | EventError.Empty -> WrongEventName (n, p, c, "it has empty name")
-        | EventError.WrongFormat -> WrongEventName (n, p, c, "it has a wrong format (it must not start/end with . and not contains any spaces)")
+        | EventError.Empty -> WrongEventName (n, p, c, "it has empty name", "")
+        | EventError.WrongFormat eventName -> WrongEventName (n, p, c, "it has a wrong format (it must not start/end with . and not contains any spaces)", eventName)
 
     let wrongDataName dataError indentation line =
         let n, p, c = line |> Line.error indentation
 
         match dataError with
-        | DataError.Empty -> WrongDataName (n, p, c, "it has empty name")
-        | DataError.WrongFormat -> WrongDataName (n, p, c, "it has a wrong format (it must not start/end with . and not contains any spaces)")
+        | DataError.Empty -> WrongDataName (n, p, c, "it has empty name", "")
+        | DataError.WrongFormat data -> WrongDataName (n, p, c, "it has a wrong format (it must not start/end with . and not contains any spaces)", data)
 
-    let wrongEvent indentation line cases =
+    let wrongEvent event indentation line cases =
         let n, p, c = line |> Line.error indentation
-        WrongEvent (n, p, c, cases)
+        WrongEvent (n, p, c, cases, event)
 
-    let wrongData indentation line cases =
+    let wrongData data indentation line cases =
         let n, p, c = line |> Line.error indentation
-        WrongData (n, p, c, cases)
+        WrongData (n, p, c, cases, data)
 
-    let undefinedParticipantInDomain indentation line domain =
+    let undefinedParticipantInDomain indentation line domain participant =
         let n, p, c = line |> Line.error indentation
-        UndefinedParticipantInDomain (n, p, c, domain |> DomainName.value)
+        UndefinedParticipantInDomain (n, p, c, domain |> DomainName.value, participant)
 
-    let wrongComponentParticipantDomain indentation line componentDomain =
+    let wrongComponentParticipantDomain indentation line componentDomain participant =
         let n, p, c = line |> Line.error indentation
-        WrongComponentParticipantDomain (n, p, c, componentDomain |> DomainName.value)
+        WrongComponentParticipantDomain (n, p, c, componentDomain |> DomainName.value, participant)
 
 module private ParserPatterns =
     let (|HasDomainType|_|) domain name (DomainTypes domainTypes) =

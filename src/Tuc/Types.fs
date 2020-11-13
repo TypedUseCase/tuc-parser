@@ -2,6 +2,23 @@ namespace Tuc
 
 open Tuc.Domain
 
+type internal DomainTypes = DomainTypes of Map<DomainName option * TypeName, ResolvedType>
+
+[<RequireQualifiedAccess>]
+type Operator =
+    | ReadData
+    | PostData
+
+[<RequireQualifiedAccess>]
+module Operator =
+    let value = function
+        | Operator.ReadData -> "->"
+        | Operator.PostData -> "->"
+
+    let descriptionMarkDown = function
+        | Operator.ReadData -> "In read data from a Data Object, it delimits a Data Object and the read data."
+        | Operator.PostData -> "In post data to a Data Object, it delimits the posted data and a Data Object."
+
 [<RequireQualifiedAccess>]
 type KeyWord =
     | TucName
@@ -12,6 +29,7 @@ type KeyWord =
     | If
     | Else
     | Loop
+    | Do
 
 [<RequireQualifiedAccess>]
 module KeyWord =
@@ -24,6 +42,7 @@ module KeyWord =
         | "if" -> KeyWord.If
         | "else" -> KeyWord.Else
         | "loop" -> KeyWord.Loop
+        | "do" -> KeyWord.Do
         | undefined -> failwithf "KeyWord %A is not defined." undefined
 
     let value = function
@@ -35,6 +54,7 @@ module KeyWord =
         | KeyWord.If -> "if"
         | KeyWord.Else -> "else"
         | KeyWord.Loop -> "loop"
+        | KeyWord.Do -> "do"
 
     let descriptionMarkDown = function
         | KeyWord.TucName -> "This is a start of a **tuc** definition. (_It will be a section in puml result._)"
@@ -45,6 +65,7 @@ module KeyWord =
         | KeyWord.If -> "Allows to group use-case parts together by a condition."
         | KeyWord.Else -> "Allows to group use-case parts together, when a condition does not pass."
         | KeyWord.Loop -> "Allows to group use-case parts together in a loop with a condition."
+        | KeyWord.Do -> "A special note above a caller."
 
 type TucName = TucName of string
 
@@ -55,44 +76,135 @@ module TucName =
 [<RequireQualifiedAccess>]
 type DataError =
     | Empty
-    | WrongFormat
+    | WrongFormat of data: string
 
 [<RequireQualifiedAccess>]
 type EventError =
     | Empty
-    | WrongFormat
+    | WrongFormat of eventName: string
+
+type Cases = Map<int * TypeName option, (TypeName * DomainType) list>
 
 type Data = {
+    Domain: DomainName
     Original: string
     Path: string list
+    Type: DomainType
+    Cases: Cases
 }
 
 [<RequireQualifiedAccess>]
 module Data =
-    let ofString = function
+    let domainType ({ Type = t }: Data) = t
+
+    let private upsert key data (map: Cases) =
+        map
+        |> Map.add key (
+            match map |> Map.tryFind key with
+            | Some old -> old @ data
+            | _ -> data
+        )
+
+    let private domainTypeCases (DomainTypes domainTypes) domain: DomainType -> _ = function
+        | DomainType (DiscriminatedUnion { Cases = cases }) ->
+            cases
+            |> List.choose (function
+                | { Name = name; Argument = TypeDefinition.IsScalar scalar } ->
+                    Some (name, DomainType (ScalarType scalar))
+
+                | { Name = name; Argument = (Type arg) } ->
+                    domainTypes
+                    |> Map.tryFind (domain, arg)
+                    |> Option.map (fun argType -> name, DomainType argType)
+
+                | _ -> None
+            )
+
+        | DomainType (SingleCaseUnion { ConstructorName = name; ConstructorArgument = TypeDefinition.IsScalar scalar }) ->
+            [ TypeName name, DomainType (ScalarType scalar) ]
+
+        | DomainType (SingleCaseUnion { ConstructorName = name; ConstructorArgument = (Type arg) }) ->
+            domainTypes
+            |> Map.tryFind (domain, arg)
+            |> Option.map (fun argType -> TypeName name, DomainType argType)
+            |> Option.toList
+
+        // todo<later> - add cases from record fields
+
+        | _ -> []
+
+    let private cases domainTypes (domain, dataType) =
+        let domainTypeCases = domainTypeCases domainTypes (Some domain)
+
+        let rec loop i acc = function
+            | [] -> acc
+            | (parent, data) :: rest ->
+                let currentCases = data |> domainTypeCases
+                let acc = currentCases |> loop (i + 1) acc
+
+                rest
+                |> loop i (acc |> upsert (i, Some parent) currentCases)
+
+        let name = dataType |> DomainType.name
+
+        [ name, dataType ]
+        |> loop 1 (Map.ofList [ (0, None), [ name, dataType ] ])
+
+    let internal ofString domainTypes domain dataType = function
         | String.IsEmpty ->
             Error DataError.Empty
         | wrongFormat when wrongFormat.Contains " " || wrongFormat.StartsWith "." || wrongFormat.EndsWith "." ->
-            Error DataError.WrongFormat
-        | event ->
+            Error (DataError.WrongFormat wrongFormat)
+        | dataPath ->
             Ok {
-                Original = event
-                Path = event.Split "." |> List.ofSeq
+                Domain = domain
+                Original = dataPath
+                Path = dataPath.Split "." |> List.ofSeq
+                Type = dataType
+                Cases = (domain, dataType) |> cases domainTypes
             }
 
     let path { Path = path } = path
-
-    let lastInPath =
-        path
-        >> List.rev
-        >> List.head
+    let lastInPath = path >> List.last
 
     let value = path >> String.concat "."
 
     // @see https://plantuml.com/link
     let link = function
         | { Path = [ single ] } -> single
-        | { Path = _ } as event -> sprintf "[[{%s}%s]]" (event |> value) (event |> lastInPath)
+        | event -> sprintf "[[{%s}%s]]" (event |> value) (event |> lastInPath)
+
+    let case (index, item: string) ({ Cases = cases; Path = path }: Data) =
+        let parent =
+            if index > 0 then Some (TypeName path.[index - 1])
+            else None
+
+        cases
+        |> Map.tryFind (index, parent)
+        |> Option.bind (Map.ofList >> Map.tryFind (TypeName (item.Trim '.')))
+
+    // todo - this might be useful for another options of a current index
+    (* let casesForCurrent index ({ Cases = cases; Path = path }: Data) =
+        let parent =
+            if index > 0 then Some (TypeName path.[index - 1])
+            else None
+
+        cases
+        |> Map.tryFind (index, parent)
+        |> Option.defaultValue [] *)
+
+    let casesFor index ({ Cases = cases; Path = path }: Data) =
+        let current = Some (TypeName path.[index])
+
+        cases
+        |> Map.tryFind (index + 1, current)
+        |> Option.defaultValue []
+
+    let iterCases f ({ Cases = cases }: Data) =
+        cases
+        |> Map.iter (fun (index, parent) cases ->
+            f index parent cases
+        )
 
 type Event = Event of Data
 
@@ -102,14 +214,20 @@ module Event =
 
     let data (Event data) = data
 
-    let ofString = Data.ofString >!> Event >@> (function
+    let internal ofString domainTypes domain data = Data.ofString domainTypes domain data >!> Event >@> (function
         | DataError.Empty -> EventError.Empty
-        | DataError.WrongFormat -> EventError.WrongFormat
+        | DataError.WrongFormat value -> EventError.WrongFormat value
     )
+
     let path = data >> Data.path
     let lastInPath = data >> Data.lastInPath
     let value = data >> Data.value
     let link = data >> Data.link
+
+type ParticipantComponentDefinition = {
+    Context: string
+    Domain: DomainName
+}
 
 type Tuc = {
     Name: TucName
@@ -123,7 +241,9 @@ and Participant =
 
 and ParticipantComponent = {
     Name: string
+    Domain: DomainName
     Participants: ActiveParticipant list
+    Type: DomainType
 }
 
 and ActiveParticipant =

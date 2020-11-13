@@ -11,26 +11,26 @@ type ParseError =
 
     // Participants
     | WrongParticipantIndentation of lineNumber: int * position: int * line: string
-    | ComponentWithoutParticipants of lineNumber: int * position: int * line: string
-    | UndefinedComponentParticipantInDomain of lineNumber: int * position: int * line: string * domain: string
+    | ComponentWithoutParticipants of lineNumber: int * position: int * line: string * componentName: string
+    | UndefinedComponentParticipantInDomain of lineNumber: int * position: int * line: string * domain: string * participant: string
     | UndefinedComponentParticipant of lineNumber: int * position: int * line: string * componentName: string * definedFields: string list * wantedService: string
-    | WrongComponentParticipantDomain of lineNumber: int * position: int * line: string * componentDomain: string
+    | WrongComponentParticipantDomain of lineNumber: int * position: int * line: string * componentDomain: string * participant: string
     | InvalidParticipant of lineNumber: int * position: int * line: string
-    | UndefinedParticipantInDomain of lineNumber: int * position: int * line: string * domain: string
-    | UndefinedParticipant of lineNumber: int * position: int * line: string
+    | UndefinedParticipantInDomain of lineNumber: int * position: int * line: string * domain: string * participant: string
+    | UndefinedParticipant of lineNumber: int * position: int * line: string * participant: string
 
     // Parts
-    | MissingUseCase of TucName
+    | MissingUseCase of lineNumber: int * TucName
     | SectionWithoutName of lineNumber: int * position: int * line: string
-    | IsNotInitiator of lineNumber: int * position: int * line: string
-    | CalledUndefinedMethod of lineNumber: int * position: int * line: string * service: string * definedMethods: string list
-    | CalledUndefinedHandler of lineNumber: int * position: int * line: string * service: string * definedHandlerNames: string list
-    | MethodCalledWithoutACaller of lineNumber: int * position: int * line: string
-    | DataPostedWithoutACaller of lineNumber: int * position: int * line: string
-    | DataReadWithoutACaller of lineNumber: int * position: int * line: string
-    | EventPostedWithoutACaller of lineNumber: int * position: int * line: string
-    | EventReadWithoutACaller of lineNumber: int * position: int * line: string
-    | MissingEventHandlerMethodCall of lineNumber: int * position: int * line: string
+    | IsNotInitiator of lineNumber: int * position: int * line: string * service: string
+    | CalledUndefinedMethod of lineNumber: int * position: int * line: string * service: string * definedMethods: string list * method: string
+    | CalledUndefinedHandler of lineNumber: int * position: int * line: string * service: string * definedHandlerNames: string list * handler: string
+    | MethodCalledWithoutACaller of lineNumber: int * position: int * line: string * service: string * method: string
+    | DataPostedWithoutACaller of lineNumber: int * position: int * line: string * data: string * dataObject: string
+    | DataReadWithoutACaller of lineNumber: int * position: int * line: string * dataObject: string * data: string
+    | EventPostedWithoutACaller of lineNumber: int * position: int * line: string * event: string * stream: string
+    | EventReadWithoutACaller of lineNumber: int * position: int * line: string * stream: string * event: string
+    | MissingEventHandlerMethodCall of lineNumber: int * position: int * line: string * stream: string
     | InvalidMultilineNote of lineNumber: int * position: int * line: string
     | InvalidMultilineLeftNote of lineNumber: int * position: int * line: string
     | InvalidMultilineRightNote of lineNumber: int * position: int * line: string
@@ -48,10 +48,10 @@ type ParseError =
     | UnknownPart of lineNumber: int * position: int * line: string
 
     // Others
-    | WrongEventName of lineNumber: int * position: int * line: string * message: string
-    | WrongDataName of lineNumber: int * position: int * line: string * message: string
-    | WrongEvent of lineNumber: int * position: int * line: string * definedCases: string list
-    | WrongData of lineNumber: int * position: int * line: string * definedCases: string list
+    | WrongEventName of lineNumber: int * position: int * line: string * message: string * eventName: string
+    | WrongDataName of lineNumber: int * position: int * line: string * message: string * dataName: string
+    | WrongEvent of lineNumber: int * position: int * line: string * definedCases: string list * eventName: string
+    | WrongData of lineNumber: int * position: int * line: string * definedCases: string list * dataName: string
 
 [<RequireQualifiedAccess>]
 module ParseError =
@@ -107,8 +107,9 @@ module ParseError =
             |> red
             |> formatLineWithError lineNumber position line
 
-        | ComponentWithoutParticipants (lineNumber, position, line) ->
-            "Component must have its participants defined, there are none here. (Or they are not indented maybe?)"
+        | ComponentWithoutParticipants (lineNumber, position, line, componentName) ->
+            componentName
+            |> sprintf "Component %A must have its participants defined, there are none here. (Or they are not indented maybe?)"
             |> red
             |> formatLineWithError lineNumber position line
 
@@ -130,13 +131,13 @@ module ParseError =
                 componentName
                 formattedFields
 
-        | UndefinedComponentParticipantInDomain (lineNumber, position, line, domain) ->
+        | UndefinedComponentParticipantInDomain (lineNumber, position, line, domain, _participant) ->
             domain
             |> sprintf "There is an undefined component participant in the %s domain. (It is not defined in the given Domain types, or it is not defined as a Record.)"
             |> red
             |> formatLineWithError lineNumber position line
 
-        | WrongComponentParticipantDomain (lineNumber, position, line, componentDomain) ->
+        | WrongComponentParticipantDomain (lineNumber, position, line, componentDomain, _participant) ->
             sprintf "This participant is not defined in the component's domain %s, or it has other domain defined." componentDomain
             |> red
             |> formatLineWithError lineNumber position line
@@ -145,20 +146,20 @@ module ParseError =
             "<c:red>There is an invalid participant. Participant format is:</c> <c:cyan>ServiceName Domain</c> <c:yellow>(as \"alias\")</c> <c:red>(Alias part is optional)</c>"
             |> formatLineWithError lineNumber position line
 
-        | UndefinedParticipantInDomain (lineNumber, position, line, domain) ->
+        | UndefinedParticipantInDomain (lineNumber, position, line, domain, _participant) ->
             domain
             |> sprintf "There is an undefined participant in the %s domain. (It is not defined in the given Domain types, or it is not defined as a Record.)"
             |> red
             |> formatLineWithError lineNumber position line
 
-        | UndefinedParticipant (lineNumber, position, line) ->
+        | UndefinedParticipant (lineNumber, position, line, _participant) ->
             "There is an undefined participant. (It is not defined in the given Domain types, or it is not defined as a Record.)"
             |> red
             |> formatLineWithError lineNumber position line
 
         // Parts
 
-        | MissingUseCase (TucName name) ->
+        | MissingUseCase (_lineNumber, TucName name) ->
             name
             |> sprintf "<c:red>There is no use-case defined in the tuc</c> <c:cyan>%s</c><c:red>.</c>"
 
@@ -167,37 +168,37 @@ module ParseError =
             |> red
             |> formatLineWithError lineNumber (position + "section ".Length) line
 
-        | IsNotInitiator (lineNumber, position, line) ->
+        | IsNotInitiator (lineNumber, position, line, _service) ->
             "Only Initiator service can have a lifeline."
             |> red
             |> formatLineWithError lineNumber position line
 
-        | MethodCalledWithoutACaller (lineNumber, position, line) ->
+        | MethodCalledWithoutACaller (lineNumber, position, line, _service, _method) ->
             "Method can be called only in the lifeline of a caller."
             |> red
             |> formatLineWithError lineNumber position line
 
-        | DataPostedWithoutACaller (lineNumber, position, line) ->
+        | DataPostedWithoutACaller (lineNumber, position, line, _data, _dataObject) ->
             "Data can be posted only in the lifeline of a caller."
             |> red
             |> formatLineWithError lineNumber position line
 
-        | DataReadWithoutACaller (lineNumber, position, line) ->
+        | DataReadWithoutACaller (lineNumber, position, line, _dataObject, _data) ->
             "Data can be read only in the lifeline of a caller."
             |> red
             |> formatLineWithError lineNumber position line
 
-        | EventPostedWithoutACaller (lineNumber, position, line) ->
+        | EventPostedWithoutACaller (lineNumber, position, line, _event, _stream) ->
             "Event can be posted only in the lifeline of a caller."
             |> red
             |> formatLineWithError lineNumber position line
 
-        | EventReadWithoutACaller (lineNumber, position, line) ->
+        | EventReadWithoutACaller (lineNumber, position, line, _stream, _event) ->
             "Event can be read only in the lifeline of a caller."
             |> red
             |> formatLineWithError lineNumber position line
 
-        | CalledUndefinedMethod (lineNumber, position, line, serviceName, definedMethods) ->
+        | CalledUndefinedMethod (lineNumber, position, line, serviceName, definedMethods, _method) ->
             let error =
                 sprintf "There is an undefined method called on the service %s." serviceName
                 |> red
@@ -216,7 +217,7 @@ module ParseError =
 
             sprintf "%s\n\n<c:red>%s</c>" error definedMethods
 
-        | CalledUndefinedHandler (lineNumber, position, line, serviceName, definedHandlers) ->
+        | CalledUndefinedHandler (lineNumber, position, line, serviceName, definedHandlers, _handler) ->
             let error =
                 sprintf "There is an undefined handler called on the service %s." serviceName
                 |> red
@@ -235,7 +236,7 @@ module ParseError =
 
             sprintf "%s\n\n<c:red>%s</c>" error definedHandlers
 
-        | MissingEventHandlerMethodCall (lineNumber, position, line) ->
+        | MissingEventHandlerMethodCall (lineNumber, position, line, _stream) ->
             "There must be exactly one handler call which handles the stream. (It must be on the subsequent line, indented by one level)"
             |> red
             |> formatLineWithError lineNumber position line
@@ -317,17 +318,17 @@ module ParseError =
 
         // others
 
-        | WrongEventName (lineNumber, position, line, message) ->
+        | WrongEventName (lineNumber, position, line, message, _event) ->
             sprintf "There is a wrong event - %s." message
             |> red
             |> formatLineWithError lineNumber position line
 
-        | WrongDataName (lineNumber, position, line, message) ->
+        | WrongDataName (lineNumber, position, line, message, _data) ->
             sprintf "There is a wrong data - %s." message
             |> red
             |> formatLineWithError lineNumber position line
 
-        | WrongEvent (lineNumber, position, line, cases) ->
+        | WrongEvent (lineNumber, position, line, cases, _event) ->
             let error =
                 "There is no such a case for an event."
                 |> red
@@ -342,7 +343,7 @@ module ParseError =
 
             sprintf "%s\n\n<c:red>%s</c>" error defineCases
 
-        | WrongData (lineNumber, position, line, cases) ->
+        | WrongData (lineNumber, position, line, cases, _data) ->
             let error =
                 "There is no such a case for a data."
                 |> red
