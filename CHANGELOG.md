@@ -2,6 +2,7 @@
 
 <!-- There is always Unreleased section on the top. Subsections (Add, Changed, Fix, Removed) should be Add as needed. -->
 ## Unreleased
+- Update to net5.0 and use F# 5.0
 
 ## 3.0.0 - 2020-11-13
 - Fix `Alias.Value` to have a surrounding `"`
