@@ -16,7 +16,7 @@ type ToolDir =
     | Local of string
 
 // ========================================================================================================
-// === F# / Public Library fake build ============================================================= 1.0.0 =
+// === F# / Public Library fake build ============================================================= 1.1.0 =
 // --------------------------------------------------------------------------------------------------------
 // Options:
 //  - no-clean   - disables clean of dirs in the first step (required on CI)
@@ -148,7 +148,7 @@ Target.create "AssemblyInfo" (fun _ ->
             AssemblyInfo.Metadata("createdAt", now.ToString("yyyy-MM-dd HH:mm:ss"))
         ]
 
-    let getProjectDetails projectPath =
+    let getProjectDetails (projectPath: string) =
         let projectName = IO.Path.GetFileNameWithoutExtension(projectPath)
         (
             projectPath,
@@ -172,8 +172,7 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Lint" <| skipOn "no-lint" (fun _ ->
-    let version = " --version 0.16.5"    // todo - remove when .net5.0 is used
-    DotnetCore.installOrUpdateTool toolsDir ("dotnet-fsharplint" + version)
+    DotnetCore.installOrUpdateTool toolsDir ("dotnet-fsharplint")
 
     let checkResult (messages: string list) =
         let rec check: string list -> unit = function
