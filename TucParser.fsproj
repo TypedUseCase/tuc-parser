@@ -6,7 +6,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>Tuc.Parser</PackageId>
     <Description>A parser for TUC files.</Description>
-    <Version>3.0.0</Version>
+    <Version>4.0.0</Version>
     <PackageProjectUrl>https://github.com/TypedUseCase/tuc-parser</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TypedUseCase/tuc-parser.git</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
