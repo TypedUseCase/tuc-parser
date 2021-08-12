@@ -5,7 +5,7 @@ source https://api.nuget.org/v3/index.json
 nuget FSharp.Core ~> 5.0
 nuget FSharp.Data ~> 4.1
 nuget MF.ConsoleApplication ~> 2.0
-nuget Tuc.DomainResolver ~> 2.1
+nuget Tuc.DomainResolver ~> 3.0
 
 nuget Expecto
 nuget YoloDev.Expecto.TestSdk

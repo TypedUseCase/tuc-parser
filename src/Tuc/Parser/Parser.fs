@@ -17,7 +17,7 @@ module Parser =
             Lines: Line list
         }
 
-        type private ParseLines<'TucItem> = MF.ConsoleApplication.Output -> IndentationLevel -> Line list -> Result<ParseResult<'TucItem>, ParseError list>
+        type private ParseLines<'TucItem> = MF.ConsoleApplication.Output -> IndentationLevel -> Line list -> Result<ParseResult<'TucItem>, Tuc.ParseError list>
 
         [<RequireQualifiedAccess>]
         module private KeyWords =
@@ -97,7 +97,7 @@ module Parser =
 
         [<RequireQualifiedAccess>]
         module private Participants =
-            type private ParseParticipants = MF.ConsoleApplication.Output -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedParticipant list, ParseError list>
+            type private ParseParticipants = MF.ConsoleApplication.Output -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedParticipant list, Tuc.ParseError list>
 
             [<RequireQualifiedAccess>]
             module private Participants =
@@ -334,7 +334,7 @@ module Parser =
                     | error -> error
                 )
 
-            let private parseParticipant location (domainTypes: DomainTypes) indentationLevel lines line: Result<ParsedParticipant * Line list, ParseError list> =
+            let private parseParticipant location (domainTypes: DomainTypes) indentationLevel lines line: Result<ParsedParticipant * Line list, Tuc.ParseError list> =
                 let participantIndentation = indentationLevel |> IndentationLevel.indentation
 
                 match line with
@@ -475,7 +475,7 @@ module Parser =
         [<RequireQualifiedAccess>]
         module private Parts =
             type private Participants = Participants of Map<string, ActiveParticipant>
-            type private ParseParts = MF.ConsoleApplication.Output -> ParsedTucName -> Participants -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedTucPart list, ParseError>
+            type private ParseParts = MF.ConsoleApplication.Output -> ParsedTucName -> Participants -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedTucPart list, Tuc.ParseError>
 
             let private (|IsParticipant|_|) (Participants participants) token =
                 participants |> Map.tryFind token
@@ -1324,7 +1324,7 @@ module Parser =
                     | [] -> Ok ()
                     | wrongLines -> Error <| WrongIndentationLevel (indentationLevel, wrongLines |> List.map RawLine.valuei)
 
-        let rec parseLines (output: MF.ConsoleApplication.Output) location domainTypes indentationLevel (tucAcc: Result<ParsedTuc, ParseError list> list) = function
+        let rec parseLines (output: MF.ConsoleApplication.Output) location domainTypes indentationLevel (tucAcc: Result<ParsedTuc, Tuc.ParseError list> list) = function
             | [] ->
                 match tucAcc with
                 | [] -> Error [ MissingTucName ]

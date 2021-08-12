@@ -42,7 +42,7 @@ module Common =
     type Case = {
         Description: string
         Tuc: string
-        Expected: Result<ParsedTuc list, ParseError list>
+        Expected: Result<ParsedTuc list, Tuc.ParseError list>
     }
 
     let case path description tuc expected =
@@ -70,7 +70,6 @@ module Common =
         | Ok _, Error error -> failtestf "%s - Success was expected, but it results in error.\n%A" description error
 
 module Domain =
-    open Tuc.Domain
     open ErrorHandling
 
     let private parseDomain output domain =
@@ -78,12 +77,14 @@ module Domain =
             let! resolvedTypes =
                 domain
                 |> Parser.parse output
-                |> List.singleton
-                |> Resolver.resolve output
+                |> Resolver.resolveOneAsync output
+                |> Async.RunSynchronously
+                |> Result.mapError (function
+                    | AsyncResolveError.UnresolvedTypes types -> types
+                    | _ -> []
+                )
 
-            return!
-                resolvedTypes
-                |> Checker.check output
+            return! resolvedTypes |> Checker.check output
         }
         |> orFail (List.map TypeName.value >> String.concat "\n  - " >> sprintf "Unresolved types:\n%s")
 
