@@ -2,6 +2,8 @@
 
 <!-- There is always Unreleased section on the top. Subsections (Add, Changed, Fix, Removed) should be Add as needed. -->
 ## Unreleased
+
+## 4.2.0 - 2021-08-13
 - Update dependencies
 
 ## 4.1.0 - 2021-08-12
