@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <PackageId>Tuc.Parser</PackageId>
     <Description>A parser for TUC files.</Description>
     <Version>4.2.0</Version>
