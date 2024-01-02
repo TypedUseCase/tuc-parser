@@ -1,7 +1,5 @@
-module DependencyConsole.Tests
-
 open Expecto
 
 [<EntryPoint>]
 let main argv =
-    Tests.runTestsInAssembly defaultConfig argv
+    Tests.runTestsInAssemblyWithCLIArgs [ Parallel ] argv

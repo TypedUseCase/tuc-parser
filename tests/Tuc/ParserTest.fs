@@ -485,7 +485,7 @@ module MultiDomain =
 
 [<Tests>]
 let parserTests =
-    let output = MF.ConsoleApplication.Output.console
+    let output = MF.ConsoleStyle.ConsoleStyle()
     let test domainTypes = List.iter (test output domainTypes)
 
     testList "Tuc.Parser" [
