@@ -70,7 +70,7 @@ module Common =
         | Ok _, Error error -> failtestf "%s - Success was expected, but it results in error.\n%A" description error
 
 module Domain =
-    open ErrorHandling
+    open Feather.ErrorHandling
 
     let private parseDomain output domain =
         result {
@@ -485,7 +485,7 @@ module MultiDomain =
 
 [<Tests>]
 let parserTests =
-    let output = MF.ConsoleStyle.ConsoleStyle()
+    let output = Feather.ConsoleStyle.ConsoleStyle()
     let test domainTypes = List.iter (test output domainTypes)
 
     testList "Tuc.Parser" [

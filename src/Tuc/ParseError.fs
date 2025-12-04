@@ -362,8 +362,8 @@ module ParseError =
         // Tuc file
         | MissingTucName -> "Missing Tuc Name"
         | TucMustHaveName _ -> "Tuc Must Have Name"
-        | MissingParticipants _ -> "Missing Participants"
-        | MissingIndentation _ -> "Missing Indentation"
+        | MissingParticipants -> "Missing Participants"
+        | MissingIndentation -> "Missing Indentation"
         | WrongIndentationLevel _ -> "Wrong Indentation Level"
         | TooMuchIndented _ -> "Too Much Indented"
 
