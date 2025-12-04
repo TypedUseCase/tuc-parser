@@ -1,4 +1,5 @@
 FSharp.Core
 FSharp.Data
-MF.ConsoleApplication
+Feather.ConsoleApplication
+Feather.ErrorHandling
 Tuc.DomainResolver

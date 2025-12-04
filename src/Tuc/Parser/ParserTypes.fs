@@ -3,7 +3,7 @@ namespace Tuc.Parser
 open System
 open Tuc
 open Tuc.Domain
-open ErrorHandling
+open Feather.ErrorHandling
 
 type private Depth = Depth of int
 type private Indentation = Indentation of int

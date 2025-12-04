@@ -7,7 +7,7 @@ open Tuc.Domain
 module Parser =
     open System
     open System.IO
-    open ErrorHandling
+    open Feather.ErrorHandling
     open ParserPatterns
 
     [<RequireQualifiedAccess>]
@@ -17,7 +17,7 @@ module Parser =
             Lines: Line list
         }
 
-        type private ParseLines<'TucItem> = MF.ConsoleApplication.Output -> IndentationLevel -> Line list -> Result<ParseResult<'TucItem>, Tuc.ParseError list>
+        type private ParseLines<'TucItem> = Feather.ConsoleApplication.Output -> IndentationLevel -> Line list -> Result<ParseResult<'TucItem>, Tuc.ParseError list>
 
         [<RequireQualifiedAccess>]
         module private KeyWords =
@@ -97,7 +97,7 @@ module Parser =
 
         [<RequireQualifiedAccess>]
         module private Participants =
-            type private ParseParticipants = MF.ConsoleApplication.Output -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedParticipant list, Tuc.ParseError list>
+            type private ParseParticipants = Feather.ConsoleApplication.Output -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedParticipant list, Tuc.ParseError list>
 
             [<RequireQualifiedAccess>]
             module private Participants =
@@ -475,7 +475,7 @@ module Parser =
         [<RequireQualifiedAccess>]
         module private Parts =
             type private Participants = Participants of Map<string, ActiveParticipant>
-            type private ParseParts = MF.ConsoleApplication.Output -> ParsedTucName -> Participants -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedTucPart list, Tuc.ParseError>
+            type private ParseParts = Feather.ConsoleApplication.Output -> ParsedTucName -> Participants -> DomainTypes -> IndentationLevel -> Line list -> Result<ParsedTucPart list, Tuc.ParseError>
 
             let private (|IsParticipant|_|) (Participants participants) token =
                 participants |> Map.tryFind token
@@ -566,7 +566,7 @@ module Parser =
                 |> List.rev
 
             let rec private parsePart
-                (output: MF.ConsoleApplication.Output)
+                (output: Feather.ConsoleApplication.Output)
                 location
                 participants
                 domainTypes
@@ -1266,7 +1266,7 @@ module Parser =
                         return { Item = parts; Lines = [] }
                     }
 
-        let private parseTuc (output: MF.ConsoleApplication.Output) location domainTypes indentationLevel lines =
+        let private parseTuc (output: Feather.ConsoleApplication.Output) location domainTypes indentationLevel lines =
             result {
                 let! name, lines =
                     match lines with
@@ -1324,7 +1324,7 @@ module Parser =
                     | [] -> Ok ()
                     | wrongLines -> Error <| WrongIndentationLevel (indentationLevel, wrongLines |> List.map RawLine.valuei)
 
-        let rec parseLines (output: MF.ConsoleApplication.Output) location domainTypes indentationLevel (tucAcc: Result<ParsedTuc, Tuc.ParseError list> list) = function
+        let rec parseLines (output: Feather.ConsoleApplication.Output) location domainTypes indentationLevel (tucAcc: Result<ParsedTuc, Tuc.ParseError list> list) = function
             | [] ->
                 match tucAcc with
                 | [] -> Error [ MissingTucName ]
@@ -1365,7 +1365,7 @@ module Parser =
                     return! lines |> parseLines output location domainTypes indentationLevel (tuc :: tucAcc)
                 }
 
-    let parseLines (output: MF.ConsoleApplication.Output) withDiagnostics domainTypes file lines = result {
+    let parseLines (output: Feather.ConsoleApplication.Output) withDiagnostics domainTypes file lines = result {
         let run name execution = Diagnostics.run withDiagnostics name execution
 
         let res, _parse = run "Parse" (fun () -> result {
@@ -1424,7 +1424,7 @@ module Parser =
         return res
     }
 
-    let parse (output: MF.ConsoleApplication.Output) withDiagnostics domainTypes file =
+    let parse (output: Feather.ConsoleApplication.Output) withDiagnostics domainTypes file =
         file
         |> File.ReadAllLines
         |> parseLines output withDiagnostics domainTypes file

@@ -5,7 +5,7 @@ open Tuc.Domain
 
 [<RequireQualifiedAccess>]
 module private Assert =
-    open ErrorHandling
+    open Feather.ErrorHandling
     open ParserPatterns
 
     let isInitiator line indentation = function
@@ -56,7 +56,7 @@ module private Assert =
             return ()
         }
 
-    let rec private assertIsOfType (output: MF.ConsoleApplication.Output) title errorEmptyName errorWrongEvent indentation line (DomainTypes domainTypes) domain dataType data =
+    let rec private assertIsOfType (output: Feather.ConsoleApplication.Output) title errorEmptyName errorWrongEvent indentation line (DomainTypes domainTypes) domain dataType data =
         let isDebug = output.IsDebug()
         if isDebug then
             output.Message (String.replicate 60 "." |> sprintf "<c:yellow>%s</c>")
@@ -135,7 +135,7 @@ module private Assert =
 
         data |> Data.path |> assertType [ dataType |> DomainType.name, dataType ] []
 
-    let event (output: MF.ConsoleApplication.Output) indentation line domainTypes expectedEventTypeName domain eventName = result {
+    let event (output: Feather.ConsoleApplication.Output) indentation line domainTypes expectedEventTypeName domain eventName = result {
         let domain, eventType =
             match domain, domainTypes with
             | Some domain, HasDomainType domain expectedEventTypeName eventType -> domain, eventType
@@ -158,7 +158,7 @@ module private Assert =
         return event
     }
 
-    let data (output: MF.ConsoleApplication.Output) indentation line domainTypes expectedDataTypeName domain dataName = result {
+    let data (output: Feather.ConsoleApplication.Output) indentation line domainTypes expectedDataTypeName domain dataName = result {
         let domain, dataType =
             match domain, domainTypes with
             | Some domain, HasDomainType domain expectedDataTypeName dataType -> domain, dataType

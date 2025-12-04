@@ -118,7 +118,7 @@ module Dump =
         | Note { Lines = lines } -> sprintf "Note:<c:gray>%s</c>" (lines |> List.formatLines (indent indentation) id)
         | RightNote { Lines = lines } -> sprintf "Right note:<c:gray>%s</c>" (lines |> List.formatLines (indent indentation) id)
 
-    let parsedTuc (output: MF.ConsoleApplication.Output) (tuc: ParsedTuc) =
+    let parsedTuc (output: Feather.ConsoleApplication.Output) (tuc: ParsedTuc) =
         tuc.Name
         |> Parsed.value
         |> TucName.value
@@ -285,7 +285,7 @@ module Dump =
                 | _ -> []
             )
 
-    let detailedParsedTuc (output: MF.ConsoleApplication.Output) (tuc: ParsedTuc) =
+    let detailedParsedTuc (output: Feather.ConsoleApplication.Output) (tuc: ParsedTuc) =
         tuc.Name
         |> FormatParsed.value (TucName.value >> sprintf "Tuc: %s")
         |> output.Message

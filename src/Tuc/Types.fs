@@ -210,7 +210,7 @@ type Event = Event of Data
 
 [<RequireQualifiedAccess>]
 module Event =
-    open ErrorHandling.Result.Operators
+    open Feather.ErrorHandling.Result.Operators
 
     let data (Event data) = data
 
